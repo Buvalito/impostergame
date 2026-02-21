@@ -62,11 +62,11 @@
       "Wie zou het meest waarschijnlijk per ongeluk 'reply all' doen?",
       "Wie zou het meest waarschijnlijk een airfryer kopen en daarna alles erin gooien?",
       "Wie zou het meest waarschijnlijk een huisdier nemen en het een veel te menselijke naam geven?",
-      "Wie zou het meest waarschijnlijk 1 aflevering kijken en eindigen om 04:00 ‘s nachts?",
+      "Wie zou het meest waarschijnlijk 1 aflevering kijken en eindigen om 04:00 's nachts?",
       "Wie zou het meest waarschijnlijk een impulsieve tattoo laten zetten?",
       "Wie zou het meest waarschijnlijk een online discussie winnen… in zijn/haar hoofd onder de douche?",
       "Wie zou het meest waarschijnlijk per ongeluk een screenshot terugsturen naar de persoon waar het over ging?",
-      "Wie zou het meest waarschijnlijk ‘ik kom eraan’ sturen terwijl hij/zij nog thuis op de bank zit?",
+      "Wie zou het meest waarschijnlijk 'ik kom eraan' sturen terwijl hij/zij nog thuis op de bank zit?",
       "Wie zou het meest waarschijnlijk een nieuwe hobby beginnen en na 2 weken weer stoppen?",
       "Wie zou het meest waarschijnlijk huilen van het lachen om zijn/haar eigen grap?",
       "Wie zou het meest waarschijnlijk een pakketje bestellen en elke 10 minuten de track & trace checken?",
@@ -103,6 +103,10 @@
       .btn-active:active { transform: scale(0.96); filter: brightness(0.9); }
       .input-focus:focus { border-color: ${ACCENT} !important; outline: none; box-shadow: 0 0 0 2px ${ACCENT}44; }
       ::-webkit-scrollbar { width: 0px; background: transparent; }
+      @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(8px); }
+        to   { opacity: 1; transform: translateY(0); }
+      }
     `;
 
     const S = {
@@ -113,7 +117,8 @@
         color: TEXT,
         display: "flex",
         flexDirection: "column",
-        overflow: "hidden"
+        overflow: "hidden",
+        animation: "fadeIn 0.2s ease-in-out",
       },
       inner: {
         flex: 1,
@@ -214,10 +219,11 @@
           zIndex: 100, 
           display: "flex", 
           flexDirection: "column", 
-          alignItems: "center", // Centreert de content horizontaal
-          fontFamily: "'Outfit', sans-serif" 
+          alignItems: "center",
+          fontFamily: "'Outfit', sans-serif",
+          animation: "fadeIn 0.2s ease-in-out",
         }}>
-          {/* Container die de breedte beperkt tot 500px, net als de rest van de app */}
+          <style>{css}</style>
           <div style={{ 
             width: "100%", 
             maxWidth: "500px", 
@@ -226,7 +232,7 @@
             flexDirection: "column", 
             padding: 24 
           }}>
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 24 }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 32 }}>
               <h2 style={{ fontSize: 24, fontWeight: 800, color: TEXT }}>Prompts beheren</h2>
               <button 
                 onClick={onClose} 
@@ -287,7 +293,6 @@
                         fontWeight: 800, 
                         fontSize: 24,
                         cursor: qText.trim() === "" ? "default" : "pointer",
-                        // Visuele feedback voor inactieve status
                         opacity: qText.trim() === "" ? 0.3 : 1,
                         filter: qText.trim() === "" ? "grayscale(0.5)" : "none",
                         transition: "all 0.3s ease"
@@ -322,90 +327,113 @@
 
     // ─── Screens ───────────────────────────────────────────────────────────────
 
-    const SetupScreen = ({ players, newPlayer, setNewPlayer, addPlayer, removePlayer, startGame, onOpenPrompts }) => (
-      <div style={S.page}>
-        <style>{css}</style>
-        <div style={S.inner}>
-          <div style={{ paddingTop: 20, marginBottom: 40, textAlign: "center" }}>
-            <div style={{ fontSize: 14, fontWeight: 800, letterSpacing: "0.15em", color: ACCENT, textTransform: "uppercase", marginBottom: 8 }}>
-              The party game
-            </div>
-            <div style={{ fontSize: 64, fontWeight: 800, lineHeight: 1.1, textTransform: "uppercase", letterSpacing: "-0.03em" }}>
-              Imposter
-            </div>
-            <div style={{ fontSize: 18, color: MUTED, marginTop: 8, fontWeight: 500 }}>
-              Who's most likely to...
-            </div>
-          </div>
+    // SetupScreen heeft een eigen inputRef voor autofocus na toevoegen
+    const SetupScreen = ({ players, newPlayer, setNewPlayer, addPlayer, removePlayer, startGame, onOpenPrompts }) => {
+      const inputRef = useRef(null);
 
-          <Card style={{ marginBottom: 20 }}>
-            <Tag>Spelers ({players.length}/8)</Tag>
-            {players.length > 0 && (
-              <div style={{ display: "flex", flexWrap: "wrap", gap: 10, marginBottom: 24 }}>
-                {players.map((p, i) => (
-                  <div key={p} className="btn-active" onClick={() => removePlayer(i)} style={{
-                    display: "flex", alignItems: "center", gap: 8, background: "#2a2a2a",
-                    borderRadius: 100, padding: "10px 16px 10px 20px", fontSize: 18, fontWeight: 600, cursor: "pointer"
-                  }}>
-                    {p}
-                    <div style={{ background: DARK, color: MUTED, borderRadius: "50%", width: 24, height: 24, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 18, fontWeight: 800, paddingBottom: 2 }}>×</div>
-                  </div>
-                ))}
+      const handleAddPlayer = () => {
+        addPlayer();
+        // Focus het inputveld direct na toevoegen, ook op mobiel
+        setTimeout(() => inputRef.current && inputRef.current.focus(), 0);
+      };
+
+      return (
+        <div style={S.page}>
+          <style>{css}</style>
+          <div style={S.inner}>
+            <div style={{ paddingTop: 20, marginBottom: 40, textAlign: "center" }}>
+              <div style={{ fontSize: 14, fontWeight: 800, letterSpacing: "0.15em", color: ACCENT, textTransform: "uppercase", marginBottom: 8 }}>
+                The party game
               </div>
-            )}
-            <div style={{ display: "flex", gap: 12 }}>
-              <input
-                className="input-focus"
-                value={newPlayer}
-                onChange={e => setNewPlayer(e.target.value)}
-                onKeyDown={e => e.key === "Enter" && newPlayer.trim() !== "" && addPlayer()}
-                placeholder="Speler toevoegen…"
-                style={{
-                  flex: 1, background: "#222", border: `2px solid ${BORDER}`, borderRadius: 16,
-                  padding: "15px", color: TEXT, fontSize: 18, minWidth: 0, fontWeight: 600, fontFamily: "'Outfit', sans-serif"
-                }}
-              />
-              <button 
-                className={newPlayer.trim() === "" ? "" : "btn-active"} 
-                onClick={addPlayer} 
-                disabled={newPlayer.trim() === ""}
-                style={{
-                  background: ACCENT, 
-                  color: "#111", 
-                  border: "none", 
-                  borderRadius: 16,
-                  padding: "0 20px", 
-                  fontSize: 28, 
-                  fontWeight: 800, 
-                  cursor: newPlayer.trim() === "" ? "default" : "pointer", 
-                  flexShrink: 0,
-                  // Effecten voor inactieve status:
-                  opacity: newPlayer.trim() === "" ? 0.3 : 1,
-                  filter: newPlayer.trim() === "" ? "grayscale(0.5)" : "none",
-                  transition: "all 0.3s ease"
-                }}
-              >
-                +
-              </button>
+              <div style={{ fontSize: 64, fontWeight: 800, lineHeight: 1.1, textTransform: "uppercase", letterSpacing: "-0.03em" }}>
+                Imposter
+              </div>
+              <div style={{ fontSize: 18, color: MUTED, marginTop: 8, fontWeight: 500 }}>
+                Who's most likely to...
+              </div>
             </div>
-          </Card>
 
-          <GhostBtn onClick={onOpenPrompts} style={{ marginBottom: 24 }}>📝 Prompts beheren</GhostBtn>
+            <Card style={{ marginBottom: 20 }}>
+              <Tag>Spelers ({players.length}/8)</Tag>
+              {players.length > 0 && (
+                <div style={{ display: "flex", flexWrap: "wrap", gap: 10, marginBottom: 24 }}>
+                  {players.map((p, i) => (
+                    <div key={p} className="btn-active" onClick={() => removePlayer(i)} style={{
+                      display: "flex", alignItems: "center", gap: 8, background: "#2a2a2a",
+                      borderRadius: 100, padding: "10px 16px 10px 20px", fontSize: 18, fontWeight: 600, cursor: "pointer"
+                    }}>
+                      {p}
+                      <div style={{ background: DARK, color: MUTED, borderRadius: "50%", width: 24, height: 24, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 18, fontWeight: 800, paddingBottom: 2 }}>×</div>
+                    </div>
+                  ))}
+                </div>
+              )}
+              <div style={{ display: "flex", gap: 12 }}>
+                <input
+                  ref={inputRef}
+                  className="input-focus"
+                  value={newPlayer}
+                  onChange={e => {
+                    const val = e.target.value;
+                    const formattedVal = val.charAt(0).toUpperCase() + val.slice(1);
+                    setNewPlayer(formattedVal);
+                  }}
+                  onKeyDown={e => e.key === "Enter" && newPlayer.trim() !== "" && handleAddPlayer()}
+                  placeholder="Speler toevoegen…"
+                  style={{
+                    flex: 1, 
+                    background: "#222", 
+                    border: `2px solid ${BORDER}`, 
+                    borderRadius: 16,
+                    padding: "15px", 
+                    color: TEXT, 
+                    fontSize: 18, 
+                    minWidth: 0, 
+                    fontWeight: 600, 
+                    fontFamily: "'Outfit', sans-serif"
+                  }}
+                />
+                <button 
+                  className={newPlayer.trim() === "" ? "" : "btn-active"} 
+                  onClick={handleAddPlayer} 
+                  disabled={newPlayer.trim() === ""}
+                  style={{
+                    background: ACCENT, 
+                    color: "#111", 
+                    border: "none", 
+                    borderRadius: 16,
+                    padding: "0 20px", 
+                    fontSize: 28, 
+                    fontWeight: 800, 
+                    cursor: newPlayer.trim() === "" ? "default" : "pointer", 
+                    flexShrink: 0,
+                    opacity: newPlayer.trim() === "" ? 0.3 : 1,
+                    filter: newPlayer.trim() === "" ? "grayscale(0.5)" : "none",
+                    transition: "all 0.3s ease"
+                  }}
+                >
+                  +
+                </button>
+              </div>
+            </Card>
 
-          <div style={{ fontSize: 16, color: MUTED, lineHeight: 1.6, fontWeight: 500, padding: "0 10px" }}>
-            <div style={{ marginBottom: 8 }}><strong style={{ color: TEXT }}>1.</strong> 📖 Lees je geheime vraag</div>
-            <div style={{ marginBottom: 8 }}><strong style={{ color: TEXT }}>2.</strong> ✍️ Schrijf een naam op</div>
-            <div style={{ marginBottom: 8 }}><strong style={{ color: TEXT }}>3.</strong> 📢 Toon je antwoord aan de groep</div>
-            <div><strong style={{ color: TEXT }}>4.</strong> 🕵️ Vind de imposter</div>
+            <GhostBtn onClick={onOpenPrompts} style={{ marginBottom: 24 }}>📝 Prompts beheren</GhostBtn>
+
+            <div style={{ fontSize: 16, color: MUTED, lineHeight: 1.6, fontWeight: 500, padding: "0 10px" }}>
+              <div style={{ marginBottom: 8 }}><strong style={{ color: TEXT }}>1.</strong> 📖 Lees je geheime vraag</div>
+              <div style={{ marginBottom: 8 }}><strong style={{ color: TEXT }}>2.</strong> ✍️ Schrijf een naam op</div>
+              <div style={{ marginBottom: 8 }}><strong style={{ color: TEXT }}>3.</strong> 📢 Toon je antwoord aan de groep</div>
+              <div><strong style={{ color: TEXT }}>4.</strong> 🕵️ Vind de imposter</div>
+            </div>
+          </div>
+          <div style={S.footer}>
+            <BigBtn onClick={startGame} disabled={players.length < 3}>
+              {players.length < 3 ? `Nog ${3 - players.length} speler${3 - players.length !== 1 ? "s" : ""} nodig` : "Spel starten"}
+            </BigBtn>
           </div>
         </div>
-        <div style={S.footer}>
-          <BigBtn onClick={startGame} disabled={players.length < 3}>
-            {players.length < 3 ? `Nog ${3 - players.length} speler${3 - players.length !== 1 ? "s" : ""} nodig` : "Spel starten"}
-          </BigBtn>
-        </div>
-      </div>
-    );
+      );
+    };
 
     const QuestionTurnScreen = ({ player, round, current, total, onShow }) => (
       <div style={S.page}>
@@ -441,7 +469,7 @@
                 borderRadius: 100, padding: "8px 20px", fontSize: 14, fontWeight: 800,
                 color: RED, letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: 30, alignSelf: "flex-start"
               }}>
-                😈 Jij bent de imposter
+              😈 Jij bent de imposter
               </div>
             )}
             <Tag color={isImposter ? RED : ACCENT}>Jouw vraag</Tag>
@@ -455,7 +483,7 @@
         </div>
         <div style={S.footer}>
           <BigBtn onClick={onDone} bg={isImposter ? RED : ACCENT} color={isImposter ? "#fff" : "#111"}>
-            {isLast ? "Iedereen heeft gelezen ✓" : "Gelezen — geef door"}
+            {isLast ? "Iedereen heeft gelezen" : "Gelezen — geef door"}
           </BigBtn>
         </div>
       </div>
@@ -621,36 +649,69 @@
 
     function ImposterGame() {
       const [phase, setPhase] = useState(PHASES.SETUP);
-      const [players, setPlayers] = useState([]);
+      const [players, setPlayers] = useState(() => {
+        try { return JSON.parse(localStorage.getItem("imposter_players")) || []; } catch { return []; }
+      });
       const [newPlayer, setNewPlayer] = useState("");
       const [round, setRound] = useState(0);
       const [currentPlayerIdx, setCurrentPlayerIdx] = useState(0);
       const [imposterIdx, setImposterIdx] = useState(null);
       
       const [promptPool, setPromptPool] = useState(INITIAL_PROMPTS);
-      const [customQuestions, setCustomQuestions] = useState([]);
+      const [customQuestions, setCustomQuestions] = useState(() => {
+        try { return JSON.parse(localStorage.getItem("imposter_custom_questions")) || []; } catch { return []; }
+      });
+
+      // availablePrompts: vragen die nog niet zijn gebruikt deze cyclus
+      const [availablePrompts, setAvailablePrompts] = useState(() => {
+        try { return JSON.parse(localStorage.getItem("imposter_available_prompts")) || [...INITIAL_PROMPTS]; } catch { return [...INITIAL_PROMPTS]; }
+      });
       
       const [currentNormalQ, setCurrentNormalQ] = useState("");
       const [currentImposterQ, setCurrentImposterQ] = useState("");
       
       const [countdown, setCountdown] = useState(3);
-      const [scores, setScores] = useState({});
+      const [scores, setScores] = useState(() => {
+        try { return JSON.parse(localStorage.getItem("imposter_scores")) || {}; } catch { return {}; }
+      });
       const [showPrompts, setShowPrompts] = useState(false);
       const countdownRef = useRef(null);
 
+      // ── LocalStorage persistentie ──────────────────────────────────────────
+      useEffect(() => {
+        try { localStorage.setItem("imposter_custom_questions", JSON.stringify(customQuestions)); } catch {}
+      }, [customQuestions]);
+
+      useEffect(() => {
+        try { localStorage.setItem("imposter_players", JSON.stringify(players)); } catch {}
+      }, [players]);
+
+      useEffect(() => {
+        try { localStorage.setItem("imposter_scores", JSON.stringify(scores)); } catch {}
+      }, [scores]);
+
+      useEffect(() => {
+        try { localStorage.setItem("imposter_available_prompts", JSON.stringify(availablePrompts)); } catch {}
+      }, [availablePrompts]);
+
+      // ── Spel starten ───────────────────────────────────────────────────────
       const startGame = (p) => {
         const pl = p || players;
         if (pl.length < 3) return;
         
         setImposterIdx(Math.floor(Math.random() * pl.length));
-        
-        // Kies twee unieke vragen uit de gehele pool
-        const shuffled = [...promptPool].sort(() => 0.5 - Math.random());
-        const nQ = shuffled[0];
-        const iQ = shuffled[1];
-        
-        setCurrentNormalQ(nQ);
-        setCurrentImposterQ(iQ);
+
+        // Gebruik availablePrompts; reset als er te weinig over zijn
+        setAvailablePrompts(prev => {
+          const pool = prev.length >= 2 ? prev : [...promptPool];
+          const shuffled = [...pool].sort(() => 0.5 - Math.random());
+          const nQ = shuffled[0];
+          const iQ = shuffled[1];
+          setCurrentNormalQ(nQ);
+          setCurrentImposterQ(iQ);
+          // Verwijder de gebruikte vragen uit de beschikbare pool
+          return shuffled.slice(2);
+        });
         
         setCurrentPlayerIdx(0);
         setRound(r => r + 1);
@@ -660,11 +721,13 @@
       const addCustomPrompt = (text) => {
         setCustomQuestions(prev => [...prev, text]);
         setPromptPool(prev => [...prev, text]);
+        setAvailablePrompts(prev => [...prev, text]);
       };
 
       const removeCustomPrompt = (textToRemove) => {
         setCustomQuestions(prev => prev.filter(q => q !== textToRemove));
         setPromptPool(prev => prev.filter(q => q !== textToRemove));
+        setAvailablePrompts(prev => prev.filter(q => q !== textToRemove));
       };
 
       const addPlayer = () => {
@@ -682,6 +745,7 @@
         setScores(prev => { const s = { ...prev }; delete s[name]; return s; });
       };
 
+      // ── Na het lezen: ga naar volgende speler of naar WRITE ──────────────
       const doneReading = () => {
         if (currentPlayerIdx + 1 < players.length) {
           setCurrentPlayerIdx(i => i + 1);
@@ -720,6 +784,12 @@
       const resetGame = () => {
         setPhase(PHASES.SETUP); setPlayers([]); setRound(0);
         setScores({}); setImposterIdx(null);
+        setAvailablePrompts([...promptPool]);
+        try {
+          localStorage.removeItem("imposter_players");
+          localStorage.removeItem("imposter_scores");
+          localStorage.removeItem("imposter_available_prompts");
+        } catch {}
       };
 
       return (
