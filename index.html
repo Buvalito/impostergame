@@ -207,73 +207,114 @@
       };
 
       return (
-        <div style={{ position: "fixed", inset: 0, background: "rgba(17,17,17,0.99)", zIndex: 100, padding: 24, display: "flex", flexDirection: "column", fontFamily: "'Outfit', sans-serif" }}>
-  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 24 }}>
-    <h2 style={{ fontSize: 24, fontWeight: 800, color: TEXT }}>Prompts beheren</h2>
-    <button 
-      onClick={onClose} 
-      className="btn-active"
-      style={{ 
-        background: BORDER, 
-        border: "none", 
-        color: TEXT, 
-        width: 40, 
-        height: 40, 
-        borderRadius: "50%", 
-        display: "flex", 
-        alignItems: "center", 
-        justifyContent: "center", 
-        fontSize: 24, 
-        fontWeight: 400,
-        cursor: "pointer"
-      }}
-    >
-      ×
-    </button>
-  </div>
-          
-          <div style={{ flex: 1, overflowY: "auto" }}>
-            <div style={{ marginBottom: 32 }}>
-              <Tag color={ACCENT}>Voeg een vraag toe</Tag>
-              <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-                <div style={{ fontSize: 16, color: TEXT, fontWeight: 600 }}>Wie zou het meest waarschijnlijk</div>
-                <div style={{ display: "flex", gap: 10 }}>
-                  <input 
-                    className="input-focus" 
-                    placeholder="...te laat komen op werk?" 
-                    value={qText} 
-                    onChange={e => setQText(e.target.value.toLowerCase())}
-                    style={{ 
-                      flex: 1, 
-                      background: "#222", 
-                      border: `2px solid ${BORDER}`, 
-                      borderRadius: 12, 
-                      padding: 14, 
-                      color: TEXT, 
-                      fontFamily: "inherit", 
-                      fontSize: 16 
-                    }} 
-                  />
-                  <button onClick={handleAdd} style={{ background: ACCENT, color: "#111", border: "none", borderRadius: 12, padding: "0 20px", fontWeight: 800, cursor: "pointer", fontSize: 24 }}>+</button>
-                </div>
-              </div>
+        <div style={{ 
+          position: "fixed", 
+          inset: 0, 
+          background: "rgba(17,17,17,0.99)", 
+          zIndex: 100, 
+          display: "flex", 
+          flexDirection: "column", 
+          alignItems: "center", // Centreert de content horizontaal
+          fontFamily: "'Outfit', sans-serif" 
+        }}>
+          {/* Container die de breedte beperkt tot 500px, net als de rest van de app */}
+          <div style={{ 
+            width: "100%", 
+            maxWidth: "500px", 
+            height: "100%", 
+            display: "flex", 
+            flexDirection: "column", 
+            padding: 24 
+          }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 24 }}>
+              <h2 style={{ fontSize: 24, fontWeight: 800, color: TEXT }}>Prompts beheren</h2>
+              <button 
+                onClick={onClose} 
+                className="btn-active"
+                style={{ 
+                  background: BORDER, 
+                  border: "none", 
+                  color: TEXT, 
+                  width: 40, 
+                  height: 40, 
+                  borderRadius: "50%", 
+                  display: "flex", 
+                  alignItems: "center", 
+                  justifyContent: "center", 
+                  fontSize: 24, 
+                  fontWeight: 400,
+                  cursor: "pointer"
+                }}
+              >
+                ×
+              </button>
             </div>
             
-            <Tag>Jouw toegevoegde vragen</Tag>
-            {customQuestions.length === 0 ? (
-              <div style={{ color: MUTED, fontSize: 16, textAlign: "center", marginTop: 20 }}>Nog geen eigen vragen toegevoegd.</div>
-            ) : (
-              customQuestions.slice().reverse().map((q, idx) => (
-                <div key={idx} style={{ padding: "16px 0", borderBottom: `1px solid ${BORDER}`, display: "flex", justifyContent: "space-between", alignItems: "center", gap: 12 }}>
-                  <div style={{ color: TEXT, fontSize: 16, fontWeight: 500, lineHeight: 1.4 }}>
-                    {q}
+            <div style={{ flex: 1, overflowY: "auto" }}>
+              <div style={{ marginBottom: 32 }}>
+                <Tag color={ACCENT}>Voeg een vraag toe</Tag>
+                <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+                  <div style={{ fontSize: 16, color: TEXT, fontWeight: 600 }}>Wie zou het meest waarschijnlijk</div>
+                  <div style={{ display: "flex", gap: 10 }}>
+                    <input 
+                      className="input-focus" 
+                      placeholder="...dit spel winnen?" 
+                      value={qText} 
+                      onChange={e => setQText(e.target.value.toLowerCase())}
+                      onKeyDown={e => e.key === "Enter" && qText.trim() !== "" && handleAdd()}
+                      style={{ 
+                        flex: 1, 
+                        background: "#222", 
+                        border: `2px solid ${BORDER}`, 
+                        borderRadius: 12, 
+                        padding: 14, 
+                        color: TEXT, 
+                        fontFamily: "inherit", 
+                        fontSize: 16,
+                        minWidth: 0 
+                      }} 
+                    />
+                    <button 
+                      className={qText.trim() === "" ? "" : "btn-active"}
+                      onClick={handleAdd} 
+                      disabled={qText.trim() === ""}
+                      style={{ 
+                        background: ACCENT, 
+                        color: "#111", 
+                        border: "none", 
+                        borderRadius: 12, 
+                        padding: "0 20px", 
+                        fontWeight: 800, 
+                        fontSize: 24,
+                        cursor: qText.trim() === "" ? "default" : "pointer",
+                        // Visuele feedback voor inactieve status
+                        opacity: qText.trim() === "" ? 0.3 : 1,
+                        filter: qText.trim() === "" ? "grayscale(0.5)" : "none",
+                        transition: "all 0.3s ease"
+                      }}
+                    >
+                      +
+                    </button>
                   </div>
-                  <button onClick={() => onDelete(q)} className="btn-active" style={{ background: RED, color: "#fff", border: "none", borderRadius: "50%", width: 32, height: 32, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 18, fontWeight: 800, cursor: "pointer", flexShrink: 0 }}>
-                    ×
-                  </button>
                 </div>
-              ))
-            )}
+              </div>
+              
+              <Tag>Jouw toegevoegde vragen</Tag>
+              {customQuestions.length === 0 ? (
+                <div style={{ color: MUTED, fontSize: 16, textAlign: "center", marginTop: 20 }}>Nog geen eigen vragen toegevoegd.</div>
+              ) : (
+                customQuestions.slice().reverse().map((q, idx) => (
+                  <div key={idx} style={{ padding: "16px 0", borderBottom: `1px solid ${BORDER}`, display: "flex", justifyContent: "space-between", alignItems: "center", gap: 12 }}>
+                    <div style={{ color: TEXT, fontSize: 16, fontWeight: 500, lineHeight: 1.4 }}>
+                      {q}
+                    </div>
+                    <button onClick={() => onDelete(q)} className="btn-active" style={{ background: RED, color: "#fff", border: "none", borderRadius: "50%", width: 32, height: 32, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 18, fontWeight: 800, cursor: "pointer", flexShrink: 0 }}>
+                      ×
+                    </button>
+                  </div>
+                ))
+              )}
+            </div>
           </div>
         </div>
       );
@@ -285,10 +326,16 @@
       <div style={S.page}>
         <style>{css}</style>
         <div style={S.inner}>
-          <div style={{ paddingTop: 20, marginBottom: 40 }}>
-            <div style={{ fontSize: 14, fontWeight: 800, letterSpacing: "0.15em", color: ACCENT, textTransform: "uppercase", marginBottom: 10 }}>Wie is de mol?</div>
-            <div style={{ fontSize: 48, fontWeight: 800, lineHeight: 1.1, letterSpacing: "-0.03em" }}>Imposter</div>
-            <div style={{ fontSize: 18, color: MUTED, marginTop: 8, fontWeight: 500 }}>Who's most likely to...</div>
+          <div style={{ paddingTop: 20, marginBottom: 40, textAlign: "center" }}>
+            <div style={{ fontSize: 14, fontWeight: 800, letterSpacing: "0.15em", color: ACCENT, textTransform: "uppercase", marginBottom: 8 }}>
+              The party game
+            </div>
+            <div style={{ fontSize: 64, fontWeight: 800, lineHeight: 1.1, textTransform: "uppercase", letterSpacing: "-0.03em" }}>
+              Imposter
+            </div>
+            <div style={{ fontSize: 18, color: MUTED, marginTop: 8, fontWeight: 500 }}>
+              Who's most likely to...
+            </div>
           </div>
 
           <Card style={{ marginBottom: 20 }}>
@@ -311,17 +358,35 @@
                 className="input-focus"
                 value={newPlayer}
                 onChange={e => setNewPlayer(e.target.value)}
-                onKeyDown={e => e.key === "Enter" && addPlayer()}
+                onKeyDown={e => e.key === "Enter" && newPlayer.trim() !== "" && addPlayer()}
                 placeholder="Speler toevoegen…"
                 style={{
                   flex: 1, background: "#222", border: `2px solid ${BORDER}`, borderRadius: 16,
                   padding: "15px", color: TEXT, fontSize: 18, minWidth: 0, fontWeight: 600, fontFamily: "'Outfit', sans-serif"
                 }}
               />
-              <button className="btn-active" onClick={addPlayer} style={{
-                background: ACCENT, color: "#111", border: "none", borderRadius: 16,
-                padding: "0 20px", fontSize: 28, fontWeight: 800, cursor: "pointer", flexShrink: 0
-              }}>+</button>
+              <button 
+                className={newPlayer.trim() === "" ? "" : "btn-active"} 
+                onClick={addPlayer} 
+                disabled={newPlayer.trim() === ""}
+                style={{
+                  background: ACCENT, 
+                  color: "#111", 
+                  border: "none", 
+                  borderRadius: 16,
+                  padding: "0 20px", 
+                  fontSize: 28, 
+                  fontWeight: 800, 
+                  cursor: newPlayer.trim() === "" ? "default" : "pointer", 
+                  flexShrink: 0,
+                  // Effecten voor inactieve status:
+                  opacity: newPlayer.trim() === "" ? 0.3 : 1,
+                  filter: newPlayer.trim() === "" ? "grayscale(0.5)" : "none",
+                  transition: "all 0.3s ease"
+                }}
+              >
+                +
+              </button>
             </div>
           </Card>
 
