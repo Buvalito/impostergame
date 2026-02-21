@@ -215,7 +215,11 @@
         <div style={{ 
           position: "fixed", 
           inset: 0, 
-          background: "rgba(17,17,17,0.99)", 
+          // Achtergrond iets transparanter maken (0.8 ipv 0.99) voor beter blur-effect
+          background: "rgba(17,17,17,0.9)", 
+          // De magische regel voor de blur:
+          backdropFilter: "blur(12px)", 
+          WebkitBackdropFilter: "blur(12px)", // Voor Safari ondersteuning
           zIndex: 100, 
           display: "flex", 
           flexDirection: "column", 
@@ -230,15 +234,15 @@
             height: "100%", 
             display: "flex", 
             flexDirection: "column", 
-            padding: 24 
+            padding: "24px 24px calc(24px + env(safe-area-inset-bottom))" // Rekening houden met inkeping onderaan mobiel
           }}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 32 }}>
-              <h2 style={{ fontSize: 24, fontWeight: 800, color: TEXT }}>Prompts beheren</h2>
+              <h2 style={{ fontSize: 24, fontWeight: 800, color: TEXT, letterSpacing: "-0.02em" }}>Prompts beheren</h2>
               <button 
                 onClick={onClose} 
                 className="btn-active"
                 style={{ 
-                  background: BORDER, 
+                  background: "rgba(255,255,255,0.1)", // Subtielere knop passend bij blur
                   border: "none", 
                   color: TEXT, 
                   width: 40, 
@@ -428,7 +432,7 @@
           </div>
           <div style={S.footer}>
             <BigBtn onClick={startGame} disabled={players.length < 3}>
-              {players.length < 3 ? `Nog ${3 - players.length} speler${3 - players.length !== 1 ? "s" : ""} nodig` : "Spel starten"}
+              {players.length < 3 ? `Nog ${3 - players.length} speler${3 - players.length !== 1 ? "s" : ""} nodig` : "🚀 Spel starten"}
             </BigBtn>
           </div>
         </div>
@@ -483,7 +487,7 @@
         </div>
         <div style={S.footer}>
           <BigBtn onClick={onDone} bg={isImposter ? RED : ACCENT} color={isImposter ? "#fff" : "#111"}>
-            {isLast ? "Iedereen heeft gelezen" : "Gelezen — geef door"}
+            {isLast ? "Iedereen heeft gelezen" : "Verbergen en doorgeven"}
           </BigBtn>
         </div>
       </div>
@@ -505,32 +509,76 @@
           </div>
         </div>
         <div style={S.footer}>
-          <BigBtn onClick={onReady}>Iedereen klaar — tel af 🚀</BigBtn>
+          <BigBtn onClick={onReady}>Onthul de namen</BigBtn>
         </div>
       </div>
     );
 
-    const CountdownScreen = ({ countdown }) => (
-      <div style={S.page}>
-        <style>{css}</style>
-        <div style={{ ...S.inner, justifyContent: "center", alignItems: "center", textAlign: "center" }}>
-          <div style={{ fontSize: 18, color: MUTED, fontWeight: 800, letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: 40 }}>
-            {countdown > 0 ? "Klaar om te tonen?" : "Toon je naam!"}
-          </div>
-          <div style={{
-            fontSize: countdown === 0 ? 140 : 180,
-            fontWeight: 800, lineHeight: 1,
-            color: countdown === 0 ? ACCENT : TEXT,
-            letterSpacing: "-0.04em",
-            textShadow: countdown === 0 ? `0 0 60px ${ACCENT}88` : "none",
-            transition: "all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275)",
-            transform: countdown === 0 ? "scale(1.2)" : "scale(1)",
-          }}>
-            {countdown === 0 ? "📢" : countdown}
-          </div>
+    const useCountdownSound = (countdown) => {
+  const audioCtxRef = React.useRef(null);
+
+  React.useEffect(() => {
+    if (countdown < 0) return;
+
+    // Maak AudioContext aan (of hergebruik)
+    if (!audioCtxRef.current) {
+      audioCtxRef.current = new (window.AudioContext || window.webkitAudioContext)();
+    }
+    const ctx = audioCtxRef.current;
+
+    const playBeep = (frequency, duration, gain = 0.3) => {
+      const oscillator = ctx.createOscillator();
+      const gainNode = ctx.createGain();
+
+      oscillator.connect(gainNode);
+      gainNode.connect(ctx.destination);
+
+      oscillator.type = "sine";
+      oscillator.frequency.setValueAtTime(frequency, ctx.currentTime);
+
+      gainNode.gain.setValueAtTime(gain, ctx.currentTime);
+      gainNode.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + duration);
+
+      oscillator.start(ctx.currentTime);
+      oscillator.stop(ctx.currentTime + duration);
+    };
+
+    if (countdown > 0) {
+      // Korte lage beep voor 3, 2, 1
+      playBeep(440, 0.15, 0.3);
+    } else {
+      // Langere hoge "go!" toon
+      playBeep(880, 0.12, 0.4);
+      setTimeout(() => playBeep(1100, 0.3, 0.35), 120);
+    }
+  }, [countdown]);
+};
+
+const CountdownScreen = ({ countdown }) => {
+  useCountdownSound(countdown);
+
+  return (
+    <div style={S.page}>
+      <style>{css}</style>
+      <div style={{ ...S.inner, justifyContent: "center", alignItems: "center", textAlign: "center" }}>
+        <div style={{ fontSize: 18, color: MUTED, fontWeight: 800, letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: 40 }}>
+          {countdown > 0 ? "Klaar om te tonen?" : "Toon je naam!"}
+        </div>
+        <div style={{
+          fontSize: countdown === 0 ? 140 : 180,
+          fontWeight: 800, lineHeight: 1,
+          color: countdown === 0 ? ACCENT : TEXT,
+          letterSpacing: "-0.04em",
+          textShadow: countdown === 0 ? `0 0 60px ${ACCENT}88` : "none",
+          transition: "all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275)",
+          transform: countdown === 0 ? "scale(1.2)" : "scale(1)",
+        }}>
+          {countdown === 0 ? "📢" : countdown}
         </div>
       </div>
-    );
+    </div>
+  );
+};
 
     const ShowNamesScreen = ({ onReveal }) => (
       <div style={S.page}>
@@ -566,7 +614,7 @@
           </div>
         </div>
         <div style={S.footer}>
-          <BigBtn onClick={onDone}>Imposter gevonden?</BigBtn>
+          <BigBtn onClick={onDone}>🕵️ Imposter gevonden?</BigBtn>
         </div>
       </div>
     );
@@ -579,7 +627,7 @@
             Uitslag
           </div>
           <div style={{ fontSize: 36, fontWeight: 800, marginBottom: 12, letterSpacing: "-0.02em", lineHeight: 1.1 }}>
-            Is de imposter gevonden?
+            Werd de imposter ontmaskerd?
           </div>
           <div style={{ fontSize: 20, color: MUTED, marginBottom: 40, fontWeight: 500 }}>
             De imposter was <strong style={{ color: TEXT, fontWeight: 800 }}>{imposterName}</strong>
@@ -610,7 +658,7 @@
           <style>{css}</style>
           <div style={S.inner}>
             <div style={{ paddingTop: 24, marginBottom: 36 }}>
-              <div style={{ fontSize: 14, color: MUTED, fontWeight: 800, letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: 10 }}>
+              <div style={{ fontSize: 14, color: MUTED, fontWeight: 800, letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: 0 }}>
                 {round} ronde{round !== 1 ? "s" : ""} gespeeld
               </div>
               <div style={{ fontSize: 44, fontWeight: 800, letterSpacing: "-0.03em" }}>Scorebord</div>
@@ -638,8 +686,8 @@
             </Card>
           </div>
           <div style={{ ...S.footer, display: "flex", flexDirection: "column", gap: 16 }}>
-            <BigBtn onClick={onPlayAgain}>Nog een ronde</BigBtn>
-            <GhostBtn onClick={onReset}>Nieuw spel</GhostBtn>
+            <BigBtn onClick={onPlayAgain}>🚀 Nog een ronde</BigBtn>
+            <GhostBtn onClick={onReset}>Terug naar hoofdmenu</GhostBtn>
           </div>
         </div>
       );
