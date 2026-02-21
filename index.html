@@ -337,10 +337,10 @@
     const InstructionsModal = ({ onClose }) => {
       const steps = [
         { emoji: "🎒", label: "Wat heb je nodig?", text: "1 smartphone + papier en pen per speler (of iets anders om op te schrijven)." },
-        { emoji: "📱", label: "Smartphone doorgeven", text: "Elke speler leest in het geheim zijn vraag. De anderen kijken weg." },
-        { emoji: "😈", label: "Eén heeft een andere vraag", text: "De imposter krijgt een andere vraag — maar weet zelf (nog) niet welke de rest heeft." },
-        { emoji: "✍️", label: "Schrijf een naam op", text: "Iedereen schrijft in het geheim op wie bij zijn vraag past. Nog niet tonen!" },
-        { emoji: "📢", label: "Toon tegelijk", text: "Na het aftellen houden jullie allemaal je papiertje met de naam op omhoog." },
+        { emoji: "📱", label: "Smartphone doorgeven", text: "Elke speler leest om de beurt discreet zijn vraag. De anderen kijken weg." },
+        { emoji: "😈", label: "Eén heeft een andere vraag", text: "De imposter krijgt een andere vraag, maar weet zelf (nog) niet welke de rest heeft." },
+        { emoji: "✍️", label: "Schrijf een naam op", text: "Iedereen schrijft discreet op wie bij zijn vraag past. Toon de naam nog niet!" },
+        { emoji: "📢", label: "Toon aan de groep", text: "Na het aftellen toont iedereen wat hij of zij heeft opgeschreven." },
         { emoji: "🕵️", label: "Vind de imposter", text: "Iedereen ziet nu de vraag. Overleg en wijs dan allemaal tegelijk aan wie jij denkt dat de imposter is." },
       ];
 
@@ -425,8 +425,8 @@
               <div style={{ paddingTop: 24, borderTop: `1px solid ${BORDER}`, marginBottom: 10 }}>
                 <div style={{ fontSize: 14, color: "#555", fontWeight: 700, letterSpacing: "0.06em", textTransform: "uppercase", marginBottom: 8 }}>Punten</div>
                 <div style={{ fontSize: 15, color: MUTED, lineHeight: 1.6, fontWeight: 500 }}>
-                  Imposter gevonden → de groep wint een punt.<br/>
-                  Niet gevonden → de imposter wint 2 punten.
+                  Imposter gevonden → de groep wint <strong style={{color: TEXT}}>1 punt</strong>.<br/>
+                  Niet gevonden → de imposter wint <strong style={{color: TEXT}}>2 punten</strong>.
                 </div>
               </div>
             </div>
@@ -628,7 +628,7 @@
             <div style={{ fontSize: 80, marginBottom: 30 }}>✍️</div>
             <div style={{ fontSize: 36, fontWeight: 800, marginBottom: 20, letterSpacing: "-0.02em" }}>Schrijf een naam op</div>
             <div style={{ fontSize: 20, color: MUTED, marginBottom: 16, lineHeight: 1.6, fontWeight: 500 }}>
-              Schrijf in het geheim op wie volgens jou bij de vraag past.
+              Schrijf discreet op wie volgens jou bij de vraag past.
             </div>
             <div style={{ fontSize: 16, color: "#666", fontWeight: 500 }}>
               Nog niet tonen!
