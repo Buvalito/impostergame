@@ -69,7 +69,7 @@
       "Wie zou het meest waarschijnlijk een impulsieve tattoo laten zetten?",
       "Wie zou het meest waarschijnlijk een online discussie winnen… in zijn/haar hoofd onder de douche?",
       "Wie zou het meest waarschijnlijk per ongeluk een screenshot terugsturen naar de persoon waar het over ging?",
-      "Wie zou het meest waarschijnlijk 'ik kom eraan' sturen terwijl hij/zij nog thuis op de bank zit?",
+      "Wie zou het meest waarschijnlijk 'onderweg' sturen terwijl hij/zij nog thuis in de zetel zit?",
       "Wie zou het meest waarschijnlijk een nieuwe hobby beginnen en na 2 weken weer stoppen?",
       "Wie zou het meest waarschijnlijk huilen van het lachen om zijn/haar eigen grap?",
       "Wie zou het meest waarschijnlijk een pakketje bestellen en elke 10 minuten de track & trace checken?",
@@ -459,8 +459,36 @@
               <div style={{ fontSize: 14, fontWeight: 800, letterSpacing: "0.15em", color: ACCENT, textTransform: "uppercase", marginBottom: 8 }}>
                 The party game
               </div>
-              <div style={{ fontSize: 64, fontWeight: 800, lineHeight: 1.1, textTransform: "uppercase", letterSpacing: "-0.03em" }}>
-                Imposter
+              <div style={{ 
+                fontSize: 64, 
+                fontWeight: 800, 
+                lineHeight: 1.1, 
+                textTransform: "uppercase", 
+                letterSpacing: "-0.03em",
+                position: "relative",
+                display: "inline-block"
+              }}>
+                <span>IMP</span>
+                <span style={{ position: "relative", display: "inline-block" }}>
+                  {/* De onzichtbare O houdt de plek exact bezet */}
+                  <span style={{ opacity: 0 }}>O</span> 
+                  
+                  <img 
+                    src="./Icon.png" 
+                    alt="O" 
+                    style={{ 
+                      position: "absolute",
+                      // 50% is het midden, 55% schuift hem iets naar rechts
+                      left: "55%", 
+                      top: "50%",
+                      transform: "translate(-50%, -50%)",
+                      height: "0.85em", 
+                      width: "auto",
+                      pointerEvents: "none"
+                    }} 
+                  />
+                </span>
+                <span>STER</span>
               </div>
               <div style={{ fontSize: 18, color: MUTED, marginTop: 8, fontWeight: 500 }}>
                 Who's most likely to...
