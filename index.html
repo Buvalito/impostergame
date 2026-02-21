@@ -470,23 +470,22 @@
               }}>
                 <span>IMP</span>
                 <span style={{ position: "relative", display: "inline-block" }}>
-                  {/* De onzichtbare O houdt de plek exact bezet */}
+                  {/* De onzichtbare O bewaart de exacte plek */}
                   <span style={{ opacity: 0 }}>O</span> 
                   
-                  <img 
-                    src="./Icon.png" 
-                    alt="O" 
+                  <span 
                     style={{ 
                       position: "absolute",
-                      // 50% is het midden, 55% schuift hem iets naar rechts
-                      left: "55%", 
+                      left: "60%", // Schuift de emoji naar rechts
                       top: "50%",
                       transform: "translate(-50%, -50%)",
-                      height: "0.85em", 
-                      width: "auto",
+                      fontSize: "0.9em", // Iets kleiner dan de tekst om binnen de lijn te vallen
+                      lineHeight: 1,
                       pointerEvents: "none"
-                    }} 
-                  />
+                    }}
+                  >
+                    🤫
+                  </span>
                 </span>
                 <span>STER</span>
               </div>
