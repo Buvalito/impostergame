@@ -1,0 +1,716 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="Imposter" />
+  <meta name="theme-color" content="#111111" />
+  <link rel="manifest" href="manifest.json" />
+  <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%23111'/><text y='.9em' font-size='80' x='10'>🕵️</text></svg>" />
+  <title>Imposter</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+    html, body, #root { height: 100%; background: #111; }
+    body { overscroll-behavior: none; }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+
+  <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+  <script type="text/babel">
+    const { useState, useEffect, useRef } = React;
+
+    const INITIAL_PROMPTS = [
+      "Wie zou het meest waarschijnlijk per ongeluk iemand anders bellen terwijl hij/zij over hen praat?",
+      "Wie zou het meest waarschijnlijk een reality show winnen?",
+      "Wie zou het meest waarschijnlijk beroemd worden op social media?",
+      "Wie zou het meest waarschijnlijk overleven op een onbewoond eiland?",
+      "Wie zou het meest waarschijnlijk president worden?",
+      "Wie zou het meest waarschijnlijk per ongeluk iets in brand steken terwijl hij/zij kookt?",
+      "Wie zou het meest waarschijnlijk een geheime dubbele identiteit hebben?",
+      "Wie zou het meest waarschijnlijk met een vreemde op vakantie gaan?",
+      "Wie zou het meest waarschijnlijk een boek schrijven?",
+      "Wie zou het meest waarschijnlijk millionair worden?",
+      "Wie zou het meest waarschijnlijk in het buitenland gaan wonen?",
+      "Wie zou het meest waarschijnlijk een uitvinding maken die de wereld verandert?",
+      "Wie zou het meest waarschijnlijk een taal leren in 3 maanden?",
+      "Wie zou het meest waarschijnlijk een extreme sport proberen?",
+      "Wie zou het meest waarschijnlijk zonder schuldgevoel iemands friet stelen?",
+      "Wie zou het meest waarschijnlijk per ongeluk zijn telefoon in de wc laten vallen?",
+      "Wie zou het meest waarschijnlijk uit een reality show worden gegooid in de eerste aflevering?",
+      "Wie zou het meest waarschijnlijk per ongeluk een gênante foto online zetten?",
+      "Wie zou het meest waarschijnlijk verdwalen in een eigen stad?",
+      "Wie zou het meest waarschijnlijk vergeten te stemmen bij de verkiezingen?",
+      "Wie zou het meest waarschijnlijk elke avond takeaway bestellen?",
+      "Wie zou het meest waarschijnlijk zijn eigen verjaardagsfeestje vergeten?",
+      "Wie zou het meest waarschijnlijk zijn koffer vergeten in te pakken?",
+      "Wie zou het meest waarschijnlijk een boek kopen maar nooit lezen?",
+      "Wie zou het meest waarschijnlijk zijn salaris uitgeven op de eerste dag?",
+      "Wie zou het meest waarschijnlijk heimwee krijgen na één nacht weg van huis?",
+      "Wie zou het meest waarschijnlijk iets uitvinden dat al bestaat?",
+      "Wie zou het meest waarschijnlijk alleen 'dankjewel' kunnen zeggen in een vreemde taal?",
+      "Wie zou het meest waarschijnlijk bang zijn voor een kleine hond?",
+      "Wie zou het meest waarschijnlijk boos worden als iemand zijn eten aanraakt?",
+      "Wie zou het meest waarschijnlijk een hele ruzie beginnen in de groepschat en daarna 'ik ga hier niet eens op reageren' zeggen?",
+      "Wie zou het meest waarschijnlijk 3 uur scrollen en dan zeggen dat hij/zij geen tijd had?",
+      "Wie zou het meest waarschijnlijk een conspiracy theorie nét iets te serieus nemen?",
+      "Wie zou het meest waarschijnlijk per ongeluk een voice memo van 4 minuten sturen?",
+      "Wie zou het meest waarschijnlijk doen alsof hij/zij een serie al heeft gezien om niet achter te lopen?",
+      "Wie zou het meest waarschijnlijk 47 tabbladen open hebben staan?",
+      "Wie zou het meest waarschijnlijk huilen om een reclame?",
+      "Wie zou het meest waarschijnlijk een powerbank meenemen naar een festival en hem zelf vergeten op te laden?",
+      "Wie zou het meest waarschijnlijk zijn/haar wachtwoord resetten en het nieuwe meteen weer vergeten?",
+      "Wie zou het meest waarschijnlijk een meme uitleggen waardoor het niet meer grappig is?",
+      "Wie zou het meest waarschijnlijk per ongeluk 'reply all' doen?",
+      "Wie zou het meest waarschijnlijk een airfryer kopen en daarna alles erin gooien?",
+      "Wie zou het meest waarschijnlijk een huisdier nemen en het een veel te menselijke naam geven?",
+      "Wie zou het meest waarschijnlijk 1 aflevering kijken en eindigen om 04:00 ‘s nachts?",
+      "Wie zou het meest waarschijnlijk een impulsieve tattoo nemen?",
+      "Wie zou het meest waarschijnlijk een online discussie winnen… in zijn/haar hoofd onder de douche?",
+      "Wie zou het meest waarschijnlijk 6 wekkers zetten en alsnog te laat komen?",
+      "Wie zou het meest waarschijnlijk een hele speech voorbereiden voor een kleine discussie?",
+      "Wie zou het meest waarschijnlijk per ongeluk een screenshot terugsturen naar de persoon waar het over ging?",
+      "Wie zou het meest waarschijnlijk ‘ik kom eraan’ sturen terwijl hij/zij nog thuis op de bank zit?",
+      "Wie zou het meest waarschijnlijk een nieuwe hobby beginnen en na 2 weken weer stoppen?",
+      "Wie zou het meest waarschijnlijk huilen van het lachen om zijn/haar eigen grap?",
+      "Wie zou het meest waarschijnlijk een pakketje bestellen en elke 10 minuten de track & trace checken?",
+      "Wie zou het meest waarschijnlijk een hele maaltijd plannen rond één kortingsactie?",
+      "Wie zou het meest waarschijnlijk een Excel-sheet maken voor iets totaal onnodigs?"
+    ];
+
+    const PHASES = {
+      SETUP:           "setup",
+      QUESTION_TURN:   "question_turn",
+      SHOW_QUESTION:   "show_question",
+      WRITE:           "write",
+      COUNTDOWN:       "countdown",
+      SHOW_NAMES:      "show_names",
+      REVEAL_QUESTION: "reveal_question",
+      RESULT:          "result",
+      SCOREBOARD:      "scoreboard",
+    };
+
+    const DARK   = "#111111";
+    const CARD   = "#1c1c1c";
+    const BORDER = "#2a2a2a";
+    const ACCENT = "#e8c547";
+    const TEXT   = "#f0f0f0";
+    const MUTED  = "#888888";
+    const RED    = "#e05252";
+    const GREEN  = "#52c98a";
+
+    const css = `
+      @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&display=swap');
+      * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+      body { margin: 0; background: ${DARK}; overscroll-behavior-y: none; }
+      .btn-active { transition: transform 0.1s ease, filter 0.2s ease; }
+      .btn-active:active { transform: scale(0.96); filter: brightness(0.9); }
+      .input-focus:focus { border-color: ${ACCENT} !important; outline: none; box-shadow: 0 0 0 2px ${ACCENT}44; }
+      ::-webkit-scrollbar { width: 0px; background: transparent; }
+    `;
+
+    const S = {
+      page: {
+        height: "100svh",
+        background: DARK,
+        fontFamily: "'Outfit', sans-serif",
+        color: TEXT,
+        display: "flex",
+        flexDirection: "column",
+        overflow: "hidden"
+      },
+      inner: {
+        flex: 1,
+        display: "flex",
+        flexDirection: "column",
+        padding: "32px 24px 40px",
+        maxWidth: "500px",
+        width: "100%",
+        margin: "0 auto",
+        overflowY: "auto"
+      },
+      footer: {
+        padding: "16px 24px 40px",
+        maxWidth: "500px",
+        width: "100%",
+        margin: "0 auto",
+        background: DARK,
+        borderTop: `1px solid ${BORDER}`
+      },
+      contentCenter: {
+        flex: 1,
+        display: "flex",
+        flexDirection: "column",
+        justifyContent: "center",
+        paddingBottom: "40px",
+      }
+    };
+
+    const Tag = ({ children, color = MUTED }) => (
+      <span style={{ fontSize: 13, fontWeight: 800, letterSpacing: "0.12em", textTransform: "uppercase", color, display: "block", marginBottom: 12 }}>
+        {children}
+      </span>
+    );
+
+    const BigBtn = ({ onClick, children, bg = ACCENT, color = "#111", disabled = false, style = {} }) => (
+      <button className={disabled ? "" : "btn-active"} onClick={onClick} disabled={disabled} style={{
+        width: "100%",
+        padding: "20px 24px",
+        background: disabled ? BORDER : bg,
+        color: disabled ? "#555" : color,
+        border: "none",
+        borderRadius: 20,
+        fontSize: 20,
+        fontWeight: 800,
+        fontFamily: "'Outfit', sans-serif",
+        cursor: disabled ? "not-allowed" : "pointer",
+        letterSpacing: "-0.01em",
+        boxShadow: disabled ? "none" : `0 8px 24px ${bg}25`,
+        opacity: disabled ? 0.7 : 1,
+        ...style
+      }}>{children}</button>
+    );
+
+    const GhostBtn = ({ onClick, children, style = {} }) => (
+      <button className="btn-active" onClick={onClick} style={{
+        width: "100%",
+        padding: "20px 24px",
+        background: "transparent",
+        color: MUTED,
+        border: `2px solid ${BORDER}`,
+        borderRadius: 20,
+        fontSize: 18,
+        fontWeight: 700,
+        fontFamily: "'Outfit', sans-serif",
+        cursor: "pointer",
+        ...style
+      }}>{children}</button>
+    );
+
+    const Card = ({ children, style = {} }) => (
+      <div style={{ background: CARD, borderRadius: 20, border: `1px solid ${BORDER}`, padding: "24px", ...style }}>
+        {children}
+      </div>
+    );
+
+    const Divider = () => <div style={{ height: 2, background: BORDER, margin: "24px 0", borderRadius: 2 }} />;
+
+    // ─── Custom Prompts Modal ──────────────────────────────────────────────────
+    
+    const PromptsModal = ({ customQuestions, onAdd, onDelete, onClose }) => {
+      const [qText, setQText] = useState("");
+
+      const handleAdd = () => {
+        if (qText.trim()) {
+          let suffix = qText.trim();
+          if (!suffix.endsWith('?')) suffix += '?';
+          
+          onAdd(`Wie zou het meest waarschijnlijk ${suffix}`);
+          setQText("");
+        }
+      };
+
+      return (
+        <div style={{ position: "fixed", inset: 0, background: "rgba(17,17,17,0.99)", zIndex: 100, padding: 24, display: "flex", flexDirection: "column", fontFamily: "'Outfit', sans-serif" }}>
+  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 24 }}>
+    <h2 style={{ fontSize: 24, fontWeight: 800, color: TEXT }}>Prompts beheren</h2>
+    <button 
+      onClick={onClose} 
+      className="btn-active"
+      style={{ 
+        background: BORDER, 
+        border: "none", 
+        color: TEXT, 
+        width: 40, 
+        height: 40, 
+        borderRadius: "50%", 
+        display: "flex", 
+        alignItems: "center", 
+        justifyContent: "center", 
+        fontSize: 24, 
+        fontWeight: 400,
+        cursor: "pointer"
+      }}
+    >
+      ×
+    </button>
+  </div>
+          
+          <div style={{ flex: 1, overflowY: "auto" }}>
+            <div style={{ marginBottom: 32 }}>
+              <Tag color={ACCENT}>Voeg een vraag toe</Tag>
+              <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+                <div style={{ fontSize: 16, color: TEXT, fontWeight: 600 }}>Wie zou het meest waarschijnlijk</div>
+                <div style={{ display: "flex", gap: 10 }}>
+                  <input 
+                    className="input-focus" 
+                    placeholder="...te laat komen op werk?" 
+                    value={qText} 
+                    onChange={e => setQText(e.target.value.toLowerCase())}
+                    style={{ 
+                      flex: 1, 
+                      background: "#222", 
+                      border: `2px solid ${BORDER}`, 
+                      borderRadius: 12, 
+                      padding: 14, 
+                      color: TEXT, 
+                      fontFamily: "inherit", 
+                      fontSize: 16 
+                    }} 
+                  />
+                  <button onClick={handleAdd} style={{ background: ACCENT, color: "#111", border: "none", borderRadius: 12, padding: "0 20px", fontWeight: 800, cursor: "pointer", fontSize: 24 }}>+</button>
+                </div>
+              </div>
+            </div>
+            
+            <Tag>Jouw toegevoegde vragen</Tag>
+            {customQuestions.length === 0 ? (
+              <div style={{ color: MUTED, fontSize: 16, textAlign: "center", marginTop: 20 }}>Nog geen eigen vragen toegevoegd.</div>
+            ) : (
+              customQuestions.slice().reverse().map((q, idx) => (
+                <div key={idx} style={{ padding: "16px 0", borderBottom: `1px solid ${BORDER}`, display: "flex", justifyContent: "space-between", alignItems: "center", gap: 12 }}>
+                  <div style={{ color: TEXT, fontSize: 16, fontWeight: 500, lineHeight: 1.4 }}>
+                    {q}
+                  </div>
+                  <button onClick={() => onDelete(q)} className="btn-active" style={{ background: RED, color: "#fff", border: "none", borderRadius: "50%", width: 32, height: 32, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 18, fontWeight: 800, cursor: "pointer", flexShrink: 0 }}>
+                    ×
+                  </button>
+                </div>
+              ))
+            )}
+          </div>
+        </div>
+      );
+    };
+
+    // ─── Screens ───────────────────────────────────────────────────────────────
+
+    const SetupScreen = ({ players, newPlayer, setNewPlayer, addPlayer, removePlayer, startGame, onOpenPrompts }) => (
+      <div style={S.page}>
+        <style>{css}</style>
+        <div style={S.inner}>
+          <div style={{ paddingTop: 20, marginBottom: 40 }}>
+            <div style={{ fontSize: 14, fontWeight: 800, letterSpacing: "0.15em", color: ACCENT, textTransform: "uppercase", marginBottom: 10 }}>Wie is de mol?</div>
+            <div style={{ fontSize: 48, fontWeight: 800, lineHeight: 1.1, letterSpacing: "-0.03em" }}>Imposter</div>
+            <div style={{ fontSize: 18, color: MUTED, marginTop: 8, fontWeight: 500 }}>Who's most likely to...</div>
+          </div>
+
+          <Card style={{ marginBottom: 20 }}>
+            <Tag>Spelers ({players.length}/8)</Tag>
+            {players.length > 0 && (
+              <div style={{ display: "flex", flexWrap: "wrap", gap: 10, marginBottom: 24 }}>
+                {players.map((p, i) => (
+                  <div key={p} className="btn-active" onClick={() => removePlayer(i)} style={{
+                    display: "flex", alignItems: "center", gap: 8, background: "#2a2a2a",
+                    borderRadius: 100, padding: "10px 16px 10px 20px", fontSize: 18, fontWeight: 600, cursor: "pointer"
+                  }}>
+                    {p}
+                    <div style={{ background: DARK, color: MUTED, borderRadius: "50%", width: 24, height: 24, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 18, fontWeight: 800, paddingBottom: 2 }}>×</div>
+                  </div>
+                ))}
+              </div>
+            )}
+            <div style={{ display: "flex", gap: 12 }}>
+              <input
+                className="input-focus"
+                value={newPlayer}
+                onChange={e => setNewPlayer(e.target.value)}
+                onKeyDown={e => e.key === "Enter" && addPlayer()}
+                placeholder="Speler toevoegen…"
+                style={{
+                  flex: 1, background: "#222", border: `2px solid ${BORDER}`, borderRadius: 16,
+                  padding: "15px", color: TEXT, fontSize: 18, minWidth: 0, fontWeight: 600, fontFamily: "'Outfit', sans-serif"
+                }}
+              />
+              <button className="btn-active" onClick={addPlayer} style={{
+                background: ACCENT, color: "#111", border: "none", borderRadius: 16,
+                padding: "0 20px", fontSize: 28, fontWeight: 800, cursor: "pointer", flexShrink: 0
+              }}>+</button>
+            </div>
+          </Card>
+
+          <GhostBtn onClick={onOpenPrompts} style={{ marginBottom: 24 }}>📝 Prompts beheren</GhostBtn>
+
+          <div style={{ fontSize: 16, color: MUTED, lineHeight: 1.6, fontWeight: 500, padding: "0 10px" }}>
+            <div style={{ marginBottom: 8 }}><strong style={{ color: TEXT }}>1.</strong> 📖 Lees je geheime vraag</div>
+            <div style={{ marginBottom: 8 }}><strong style={{ color: TEXT }}>2.</strong> ✍️ Schrijf een naam op</div>
+            <div style={{ marginBottom: 8 }}><strong style={{ color: TEXT }}>3.</strong> 📢 Toon je antwoord aan de groep</div>
+            <div><strong style={{ color: TEXT }}>4.</strong> 🕵️ Vind de imposter</div>
+          </div>
+        </div>
+        <div style={S.footer}>
+          <BigBtn onClick={startGame} disabled={players.length < 3}>
+            {players.length < 3 ? `Nog ${3 - players.length} speler${3 - players.length !== 1 ? "s" : ""} nodig` : "Spel starten"}
+          </BigBtn>
+        </div>
+      </div>
+    );
+
+    const QuestionTurnScreen = ({ player, round, current, total, onShow }) => (
+      <div style={S.page}>
+        <style>{css}</style>
+        <div style={S.inner}>
+          <div style={S.contentCenter}>
+            <div style={{ fontSize: 14, color: MUTED, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: 50 }}>
+              Ronde {round} &nbsp;·&nbsp; {current}/{total}
+            </div>
+            <div style={{ fontSize: 80, marginBottom: 30 }}>👀</div>
+            <div style={{ fontSize: 40, fontWeight: 800, marginBottom: 16, letterSpacing: "-0.02em" }}>
+              Hey <span style={{ color: ACCENT }}>{player}</span>
+            </div>
+            <div style={{ fontSize: 20, color: MUTED, lineHeight: 1.5, fontWeight: 500 }}>
+              Pak de telefoon en lees jouw vraag.<br />De anderen kijken weg.
+            </div>
+          </div>
+        </div>
+        <div style={S.footer}>
+          <BigBtn onClick={onShow}>Toon mijn vraag</BigBtn>
+        </div>
+      </div>
+    );
+
+    const ShowQuestionScreen = ({ isImposter, question, isLast, onDone }) => (
+      <div style={{ ...S.page, background: isImposter ? "#1a0b0b" : DARK }}>
+        <style>{css}</style>
+        <div style={S.inner}>
+          <div style={S.contentCenter}>
+            {isImposter && (
+              <div style={{
+                display: "inline-block", background: "#3a1212", border: `2px solid #6a1a1a`,
+                borderRadius: 100, padding: "8px 20px", fontSize: 14, fontWeight: 800,
+                color: RED, letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: 30, alignSelf: "flex-start"
+              }}>
+                😈 Jij bent de imposter
+              </div>
+            )}
+            <Tag color={isImposter ? RED : ACCENT}>Jouw vraag</Tag>
+            <div style={{ fontSize: 32, fontWeight: 800, lineHeight: 1.4, marginBottom: 40, letterSpacing: "-0.02em" }}>
+              {question}
+            </div>
+            <div style={{ fontSize: 18, color: MUTED, lineHeight: 1.6, fontWeight: 500 }}>
+              Onthoud je vraag goed.<br />Vertel niets aan de anderen. 🤐
+            </div>
+          </div>
+        </div>
+        <div style={S.footer}>
+          <BigBtn onClick={onDone} bg={isImposter ? RED : ACCENT} color={isImposter ? "#fff" : "#111"}>
+            {isLast ? "Iedereen heeft gelezen ✓" : "Gelezen — geef door"}
+          </BigBtn>
+        </div>
+      </div>
+    );
+
+    const WriteScreen = ({ onReady }) => (
+      <div style={S.page}>
+        <style>{css}</style>
+        <div style={S.inner}>
+          <div style={{ ...S.contentCenter, textAlign: "center" }}>
+            <div style={{ fontSize: 80, marginBottom: 30 }}>✍️</div>
+            <div style={{ fontSize: 36, fontWeight: 800, marginBottom: 20, letterSpacing: "-0.02em" }}>Schrijf een naam op</div>
+            <div style={{ fontSize: 20, color: MUTED, marginBottom: 16, lineHeight: 1.6, fontWeight: 500 }}>
+              Schrijf in het geheim op wie volgens jou bij de vraag past.
+            </div>
+            <div style={{ fontSize: 16, color: "#666", fontWeight: 500 }}>
+              Nog niet tonen!
+            </div>
+          </div>
+        </div>
+        <div style={S.footer}>
+          <BigBtn onClick={onReady}>Iedereen klaar — tel af 🚀</BigBtn>
+        </div>
+      </div>
+    );
+
+    const CountdownScreen = ({ countdown }) => (
+      <div style={S.page}>
+        <style>{css}</style>
+        <div style={{ ...S.inner, justifyContent: "center", alignItems: "center", textAlign: "center" }}>
+          <div style={{ fontSize: 18, color: MUTED, fontWeight: 800, letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: 40 }}>
+            {countdown > 0 ? "Klaar om te tonen?" : "Toon je naam!"}
+          </div>
+          <div style={{
+            fontSize: countdown === 0 ? 140 : 180,
+            fontWeight: 800, lineHeight: 1,
+            color: countdown === 0 ? ACCENT : TEXT,
+            letterSpacing: "-0.04em",
+            textShadow: countdown === 0 ? `0 0 60px ${ACCENT}88` : "none",
+            transition: "all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275)",
+            transform: countdown === 0 ? "scale(1.2)" : "scale(1)",
+          }}>
+            {countdown === 0 ? "📢" : countdown}
+          </div>
+        </div>
+      </div>
+    );
+
+    const ShowNamesScreen = ({ onReveal }) => (
+      <div style={S.page}>
+        <style>{css}</style>
+        <div style={S.inner}>
+          <div style={{ ...S.contentCenter, textAlign: "center" }}>
+            <div style={{ fontSize: 80, marginBottom: 30 }}>👀</div>
+            <div style={{ fontSize: 36, fontWeight: 800, marginBottom: 20, letterSpacing: "-0.02em" }}>Namen tonen!</div>
+            <div style={{ fontSize: 20, color: MUTED, lineHeight: 1.6, fontWeight: 500 }}>
+              Heeft iedereen de namen gezien?<br />Druk dan op de knop om de vraag te onthullen.
+            </div>
+          </div>
+        </div>
+        <div style={S.footer}>
+          <BigBtn onClick={onReveal}>Toon de vraag</BigBtn>
+        </div>
+      </div>
+    );
+
+    const RevealQuestionScreen = ({ normalQuestion, onDone }) => (
+      <div style={S.page}>
+        <style>{css}</style>
+        <div style={S.inner}>
+          <div style={S.contentCenter}>
+            <Tag color={ACCENT}>De vraag was</Tag>
+            <div style={{ fontSize: 32, fontWeight: 800, lineHeight: 1.4, marginBottom: 30, letterSpacing: "-0.02em" }}>
+              {normalQuestion}
+            </div>
+            <Divider />
+            <div style={{ fontSize: 20, color: MUTED, lineHeight: 1.6, fontWeight: 500 }}>
+              Discussieer met de groep en wijs dan <strong style={{color: TEXT}}>tegelijk</strong> naar wie jij denkt dat de imposter is. ☝️
+            </div>
+          </div>
+        </div>
+        <div style={S.footer}>
+          <BigBtn onClick={onDone}>Imposter gevonden?</BigBtn>
+        </div>
+      </div>
+    );
+
+    const ResultScreen = ({ imposterName, normalQ, imposterQ, onFound, onNotFound }) => (
+      <div style={S.page}>
+        <style>{css}</style>
+        <div style={{ ...S.inner, paddingTop: 40 }}>
+          <div style={{ fontSize: 14, color: MUTED, fontWeight: 800, letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: 8 }}>
+            Uitslag
+          </div>
+          <div style={{ fontSize: 36, fontWeight: 800, marginBottom: 12, letterSpacing: "-0.02em", lineHeight: 1.1 }}>
+            Is de imposter gevonden?
+          </div>
+          <div style={{ fontSize: 20, color: MUTED, marginBottom: 40, fontWeight: 500 }}>
+            De imposter was <strong style={{ color: TEXT, fontWeight: 800 }}>{imposterName}</strong>
+          </div>
+
+          <Card style={{ marginBottom: 40, padding: "28px 24px" }}>
+            <Tag>Gewone vraag</Tag>
+            <div style={{ fontSize: 18, lineHeight: 1.5, marginBottom: 20, fontWeight: 600 }}>{normalQ}</div>
+            <Divider />
+            <Tag color={RED}>Imposter vraag</Tag>
+            <div style={{ fontSize: 18, lineHeight: 1.5, color: MUTED, fontWeight: 500 }}>{imposterQ}</div>
+          </Card>
+        </div>
+        <div style={{ ...S.footer, display: "flex", flexDirection: "column", gap: 16 }}>
+          <BigBtn onClick={onFound} bg={GREEN} color="#fff">Ja, de groep wint</BigBtn>
+          <BigBtn onClick={onNotFound} bg={RED} color="#fff">Nee, {imposterName} wint</BigBtn>
+        </div>
+      </div>
+    );
+
+    const ScoreboardScreen = ({ players, scores, round, onPlayAgain, onReset }) => {
+      const sorted = [...players].sort((a, b) => (scores[b] || 0) - (scores[a] || 0));
+      const maxScore = Math.max(...players.map(p => scores[p] || 0), 1);
+      const medals = ["🥇", "🥈", "🥉"];
+
+      return (
+        <div style={S.page}>
+          <style>{css}</style>
+          <div style={S.inner}>
+            <div style={{ paddingTop: 24, marginBottom: 36 }}>
+              <div style={{ fontSize: 14, color: MUTED, fontWeight: 800, letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: 10 }}>
+                {round} ronde{round !== 1 ? "s" : ""} gespeeld
+              </div>
+              <div style={{ fontSize: 44, fontWeight: 800, letterSpacing: "-0.03em" }}>Scorebord</div>
+            </div>
+
+            <Card style={{ marginBottom: 40, padding: "16px 24px" }}>
+              {sorted.map((name, i) => {
+                const score = scores[name] || 0;
+                return (
+                  <div key={name}>
+                    {i > 0 && <div style={{ height: 2, background: BORDER, margin: "16px 0", borderRadius: 2 }} />}
+                    <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
+                      <span style={{ fontSize: 28, width: 36, textAlign: "center" }}>{medals[i] || <span style={{fontSize: 18, color: MUTED, fontWeight: 800}}>{i+1}</span>}</span>
+                      <div style={{ flex: 1 }}>
+                        <div style={{ fontSize: 20, fontWeight: 800, marginBottom: 8 }}>{name}</div>
+                        <div style={{ background: "#2a2a2a", borderRadius: 100, height: 8, overflow: "hidden" }}>
+                          <div style={{ height: "100%", borderRadius: 100, width: `${(score / maxScore) * 100}%`, background: i === 0 ? ACCENT : "#666", transition: "width 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275)" }} />
+                        </div>
+                      </div>
+                      <span style={{ fontSize: 28, fontWeight: 800, color: i === 0 ? ACCENT : TEXT, minWidth: 40, textAlign: "right" }}>{score}</span>
+                    </div>
+                  </div>
+                );
+              })}
+            </Card>
+          </div>
+          <div style={{ ...S.footer, display: "flex", flexDirection: "column", gap: 16 }}>
+            <BigBtn onClick={onPlayAgain}>Nog een ronde</BigBtn>
+            <GhostBtn onClick={onReset}>Nieuw spel</GhostBtn>
+          </div>
+        </div>
+      );
+    };
+
+    // ─── Main ──────────────────────────────────────────────────────────────────
+
+    function ImposterGame() {
+      const [phase, setPhase] = useState(PHASES.SETUP);
+      const [players, setPlayers] = useState([]);
+      const [newPlayer, setNewPlayer] = useState("");
+      const [round, setRound] = useState(0);
+      const [currentPlayerIdx, setCurrentPlayerIdx] = useState(0);
+      const [imposterIdx, setImposterIdx] = useState(null);
+      
+      const [promptPool, setPromptPool] = useState(INITIAL_PROMPTS);
+      const [customQuestions, setCustomQuestions] = useState([]);
+      
+      const [currentNormalQ, setCurrentNormalQ] = useState("");
+      const [currentImposterQ, setCurrentImposterQ] = useState("");
+      
+      const [countdown, setCountdown] = useState(3);
+      const [scores, setScores] = useState({});
+      const [showPrompts, setShowPrompts] = useState(false);
+      const countdownRef = useRef(null);
+
+      const startGame = (p) => {
+        const pl = p || players;
+        if (pl.length < 3) return;
+        
+        setImposterIdx(Math.floor(Math.random() * pl.length));
+        
+        // Kies twee unieke vragen uit de gehele pool
+        const shuffled = [...promptPool].sort(() => 0.5 - Math.random());
+        const nQ = shuffled[0];
+        const iQ = shuffled[1];
+        
+        setCurrentNormalQ(nQ);
+        setCurrentImposterQ(iQ);
+        
+        setCurrentPlayerIdx(0);
+        setRound(r => r + 1);
+        setPhase(PHASES.QUESTION_TURN);
+      };
+
+      const addCustomPrompt = (text) => {
+        setCustomQuestions(prev => [...prev, text]);
+        setPromptPool(prev => [...prev, text]);
+      };
+
+      const removeCustomPrompt = (textToRemove) => {
+        setCustomQuestions(prev => prev.filter(q => q !== textToRemove));
+        setPromptPool(prev => prev.filter(q => q !== textToRemove));
+      };
+
+      const addPlayer = () => {
+        const name = newPlayer.trim();
+        if (name && !players.includes(name) && players.length < 8) {
+          setPlayers(prev => [...prev, name]);
+          setScores(prev => ({ ...prev, [name]: prev[name] || 0 }));
+          setNewPlayer("");
+        }
+      };
+
+      const removePlayer = (i) => {
+        const name = players[i];
+        setPlayers(prev => prev.filter((_, idx) => idx !== i));
+        setScores(prev => { const s = { ...prev }; delete s[name]; return s; });
+      };
+
+      const doneReading = () => {
+        if (currentPlayerIdx + 1 < players.length) {
+          setCurrentPlayerIdx(i => i + 1);
+          setPhase(PHASES.QUESTION_TURN);
+        } else {
+          setPhase(PHASES.WRITE);
+        }
+      };
+
+      const startCountdown = () => { setCountdown(3); setPhase(PHASES.COUNTDOWN); };
+
+      useEffect(() => {
+        if (phase !== PHASES.COUNTDOWN) return;
+        countdownRef.current = setInterval(() => {
+          setCountdown(c => {
+            if (c <= 1) { clearInterval(countdownRef.current); setPhase(PHASES.SHOW_NAMES); return 0; }
+            return c - 1;
+          });
+        }, 1000);
+        return () => clearInterval(countdownRef.current);
+      }, [phase]);
+
+      const handleResult = (imposterFound) => {
+        setScores(prev => {
+          const s = { ...prev };
+          if (imposterFound) {
+            players.forEach((p, i) => { if (i !== imposterIdx) s[p] = (s[p] || 0) + 1; });
+          } else {
+            s[players[imposterIdx]] = (s[players[imposterIdx]] || 0) + 1;
+          }
+          return s;
+        });
+        setPhase(PHASES.SCOREBOARD);
+      };
+
+      const resetGame = () => {
+        setPhase(PHASES.SETUP); setPlayers([]); setRound(0);
+        setScores({}); setImposterIdx(null);
+      };
+
+      return (
+        <React.Fragment>
+          {showPrompts && (
+            <PromptsModal 
+              customQuestions={customQuestions} 
+              onAdd={addCustomPrompt} 
+              onDelete={removeCustomPrompt}
+              onClose={() => setShowPrompts(false)} 
+            />
+          )}
+          
+          {phase === PHASES.SETUP && (
+            <SetupScreen players={players} newPlayer={newPlayer} setNewPlayer={setNewPlayer} addPlayer={addPlayer} removePlayer={removePlayer} startGame={() => startGame()} onOpenPrompts={() => setShowPrompts(true)} />
+          )}
+          {phase === PHASES.QUESTION_TURN && (
+            <QuestionTurnScreen player={players[currentPlayerIdx]} round={round} current={currentPlayerIdx + 1} total={players.length} onShow={() => setPhase(PHASES.SHOW_QUESTION)} />
+          )}
+          {phase === PHASES.SHOW_QUESTION && (
+            <ShowQuestionScreen isImposter={currentPlayerIdx === imposterIdx} question={currentPlayerIdx === imposterIdx ? currentImposterQ : currentNormalQ} isLast={currentPlayerIdx + 1 === players.length} onDone={doneReading} />
+          )}
+          {phase === PHASES.WRITE && (
+            <WriteScreen onReady={startCountdown} />
+          )}
+          {phase === PHASES.COUNTDOWN && (
+            <CountdownScreen countdown={countdown} />
+          )}
+          {phase === PHASES.SHOW_NAMES && (
+            <ShowNamesScreen onReveal={() => setPhase(PHASES.REVEAL_QUESTION)} />
+          )}
+          {phase === PHASES.REVEAL_QUESTION && (
+            <RevealQuestionScreen normalQuestion={currentNormalQ} onDone={() => setPhase(PHASES.RESULT)} />
+          )}
+          {phase === PHASES.RESULT && (
+            <ResultScreen imposterName={players[imposterIdx]} normalQ={currentNormalQ} imposterQ={currentImposterQ} onFound={() => handleResult(true)} onNotFound={() => handleResult(false)} />
+          )}
+          {phase === PHASES.SCOREBOARD && (
+            <ScoreboardScreen players={players} scores={scores} round={round} onPlayAgain={() => startGame()} onReset={resetGame} />
+          )}
+        </React.Fragment>
+      );
+    }
+
+    const root = ReactDOM.createRoot(document.getElementById("root"));
+    root.render(<ImposterGame />);
+  </script>
+</body>
+</html>
