@@ -1,11 +1,12 @@
 {
   "name": "Imposter - Wie is de mol?",
   "short_name": "Imposter",
-  "description": "Who's most likely to party game",
-  "start_url": "./index.html",
+  "start_url": "./",
+  "scope": "./",
   "display": "standalone",
-  "background_color": "#111111",
+  "display_override": ["standalone", "minimal-ui"],
   "theme_color": "#111111",
+  "background_color": "#111111",
   "orientation": "portrait",
   "icons": [
     {
