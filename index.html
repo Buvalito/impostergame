@@ -13,7 +13,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Jersey+15&display=swap" rel="stylesheet">
-  <title>Imposter</title>
+  <title>Imposter - The Party Game</title>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
     html, body, #root { height: 100%; background: #111; }
@@ -346,7 +346,7 @@
       const steps = [
         { emoji: "🎒", label: "Wat heb je nodig?", text: "1 smartphone + papier en pen per speler (of iets anders om op te schrijven)." },
         { emoji: "📱", label: "Smartphone doorgeven", text: "Elke speler leest om de beurt discreet zijn vraag. De anderen kijken weg." },
-        { emoji: "😈", label: "Eén heeft een andere vraag", text: "De imposter krijgt een andere vraag, maar weet zelf (nog) niet welke de rest heeft." },
+        { emoji: "😈", label: "Een andere vraag", text: "De imposter krijgt een andere vraag, maar weet zelf (nog) niet welke de rest heeft." },
         { emoji: "✍️", label: "Schrijf een naam op", text: "Iedereen schrijft discreet op wie bij zijn vraag past. Toon de naam nog niet!" },
         { emoji: "📢", label: "Toon aan de groep", text: "Na het aftellen toont iedereen wat hij of zij heeft opgeschreven." },
         { emoji: "🕵️", label: "Vind de imposter", text: "Iedereen ziet nu de vraag. Overleg en wijs dan allemaal tegelijk aan wie jij denkt dat de imposter is." },
@@ -447,10 +447,214 @@
       );
     };
 
+    // ─── Settings Modal ────────────────────────────────────────────────────────
+
+    const Toggle = ({ enabled, onToggle }) => (
+      <div
+        className="btn-active"
+        onClick={onToggle}
+        style={{
+          width: 52,
+          height: 30,
+          borderRadius: 100,
+          background: enabled ? ACCENT : "#333",
+          position: "relative",
+          cursor: "pointer",
+          flexShrink: 0,
+          transition: "background 0.2s ease",
+          border: "none",
+        }}
+      >
+        <div style={{
+          position: "absolute",
+          top: 3,
+          left: enabled ? 25 : 3,
+          width: 24,
+          height: 24,
+          borderRadius: "50%",
+          background: enabled ? "#111" : "#666",
+          transition: "left 0.2s ease, background 0.2s ease",
+        }} />
+      </div>
+    );
+
+    const Stepper = ({ value, onChange, min, max, step = 1, format = v => v }) => (
+      <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+        <button
+          className="btn-active"
+          onClick={() => onChange(Math.max(min, value - step))}
+          disabled={value <= min}
+          style={{
+            width: 36, height: 36, borderRadius: "50%",
+            background: value <= min ? "#222" : "#2a2a2a",
+            border: `1px solid ${BORDER}`,
+            color: value <= min ? "#444" : TEXT,
+            fontSize: 20, fontWeight: 700,
+            cursor: value <= min ? "not-allowed" : "pointer",
+            display: "flex", alignItems: "center", justifyContent: "center",
+            flexShrink: 0,
+          }}
+        >−</button>
+        <div style={{ fontSize: 18, fontWeight: 800, color: ACCENT, minWidth: 60, textAlign: "center" }}>
+          {format(value)}
+        </div>
+        <button
+          className="btn-active"
+          onClick={() => onChange(Math.min(max, value + step))}
+          disabled={value >= max}
+          style={{
+            width: 36, height: 36, borderRadius: "50%",
+            background: value >= max ? "#222" : "#2a2a2a",
+            border: `1px solid ${BORDER}`,
+            color: value >= max ? "#444" : TEXT,
+            fontSize: 20, fontWeight: 700,
+            cursor: value >= max ? "not-allowed" : "pointer",
+            display: "flex", alignItems: "center", justifyContent: "center",
+            flexShrink: 0,
+          }}
+        >+</button>
+      </div>
+    );
+
+    const SettingsModal = ({ settings, onSave, onClose }) => {
+      const [local, setLocal] = useState({ ...settings });
+
+      const update = (key, val) => setLocal(prev => ({ ...prev, [key]: val }));
+
+      const SettingRow = ({ label, subtitle, right }) => (
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 16, paddingBottom: 24, marginBottom: 24, borderBottom: `1px solid ${BORDER}` }}>
+          <div>
+            <div style={{ fontSize: 17, fontWeight: 700, color: TEXT, marginBottom: 5 }}>{label}</div>
+            {subtitle && <div style={{ fontSize: 14, color: MUTED, fontWeight: 500, lineHeight: 1.4 }}>{subtitle}</div>}
+          </div>
+          {right}
+        </div>
+      );
+
+      return (
+        <div style={{
+          position: "fixed",
+          inset: 0,
+          background: "rgba(17,17,17,0.9)",
+          backdropFilter: "blur(12px)",
+          WebkitBackdropFilter: "blur(12px)",
+          zIndex: 100,
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          fontFamily: "'Outfit', sans-serif",
+          animation: "fadeIn 0.2s ease-in-out",
+        }}>
+          <style>{css}</style>
+          <div style={{
+            width: "100%",
+            maxWidth: "500px",
+            height: "100%",
+            display: "flex",
+            flexDirection: "column",
+            padding: "24px 24px calc(24px + env(safe-area-inset-bottom))"
+          }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 36 }}>
+              <h2 style={{ fontSize: 24, fontWeight: 800, color: TEXT, letterSpacing: "-0.02em", margin: 0 }}>Instellingen</h2>
+              <button
+                onClick={onClose}
+                className="btn-active"
+                style={{
+                  background: "rgba(255,255,255,0.1)",
+                  border: "none",
+                  color: TEXT,
+                  width: 40,
+                  height: 40,
+                  borderRadius: "50%",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  fontSize: 24,
+                  fontWeight: 400,
+                  cursor: "pointer",
+                  flexShrink: 0,
+                }}
+              >×</button>
+            </div>
+
+            <div style={{ flex: 1, overflowY: "auto" }}>
+
+              {/* Discussietimer */}
+              <SettingRow
+                label="Discussietimer"
+                subtitle="Automatisch aftellen tijdens het overleggen."
+                right={<Toggle enabled={local.timerEnabled} onToggle={() => update("timerEnabled", !local.timerEnabled)} />}
+              />
+              {local.timerEnabled && (
+                <div style={{ marginBottom: 24, paddingBottom: 24, borderBottom: `1px solid ${BORDER}` }}>
+                  <div style={{ fontSize: 14, color: MUTED, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", marginBottom: 16 }}>Tijdsduur</div>
+                  <Stepper
+                    value={local.timerSeconds}
+                    onChange={v => update("timerSeconds", v)}
+                    min={15}
+                    max={180}
+                    step={15}
+                    format={v => `${v}s`}
+                  />
+                </div>
+              )}
+
+              {/* Doelstand */}
+              <SettingRow
+                label="Eindscore"
+                subtitle="Het spel eindigt als iemand dit aantal punten haalt."
+                right={<Toggle enabled={local.targetEnabled} onToggle={() => update("targetEnabled", !local.targetEnabled)} />}
+              />
+              {local.targetEnabled && (
+                <div style={{ marginBottom: 24, paddingBottom: 24, borderBottom: `1px solid ${BORDER}` }}>
+                  <div style={{ fontSize: 14, color: MUTED, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", marginBottom: 16 }}>Punten om te winnen</div>
+                  <Stepper
+                    value={local.targetScore}
+                    onChange={v => update("targetScore", v)}
+                    min={3}
+                    max={30}
+                    step={1}
+                    format={v => `${v} pt`}
+                  />
+                </div>
+              )}
+
+              {/* Alleen eigen vragen */}
+              <SettingRow
+                label="Enkel eigen vragen"
+                subtitle="Schakelt de standaardvragen uit. Enkel jouw toegevoegde prompts worden gebruikt."
+                right={<Toggle enabled={local.customOnly} onToggle={() => update("customOnly", !local.customOnly)} />}
+              />
+
+              {/* Blinde imposter */}
+              <SettingRow
+                label="Blinde imposter"
+                subtitle="De imposter krijgt een andere vraag, maar weet zelf niet dat hij/zij de imposter is."
+                right={<Toggle enabled={local.blindImposter} onToggle={() => update("blindImposter", !local.blindImposter)} />}
+              />
+
+              {/* App info */}
+              <div style={{ paddingTop: 8, textAlign: "center", paddingBottom: 10 }}>
+                <div style={{ fontSize: 15, fontWeight: 800, color: MUTED, letterSpacing: "-0.01em", marginBottom: 4 }}>
+                  Imposter — The Party Game
+                </div>
+                <div style={{ fontSize: 13, color: "#444", fontWeight: 600 }}>versie 1.0.1</div>
+              </div>
+
+            </div>
+
+            <div style={{ paddingTop: 16 }}>
+              <BigBtn onClick={() => { onSave(local); onClose(); }}>Opslaan</BigBtn>
+            </div>
+          </div>
+        </div>
+      );
+    };
+
     // ─── Screens ───────────────────────────────────────────────────────────────
 
     // SetupScreen heeft een eigen inputRef voor autofocus na toevoegen
-    const SetupScreen = ({ players, newPlayer, setNewPlayer, addPlayer, removePlayer, startGame, onOpenPrompts, onOpenInstructions }) => {
+    const SetupScreen = ({ players, newPlayer, setNewPlayer, addPlayer, removePlayer, startGame, onOpenPrompts, onOpenInstructions, onOpenSettings }) => {
       const inputRef = useRef(null);
 
       const handleAddPlayer = () => {
@@ -462,38 +666,57 @@
       return (
         <div style={S.page}>
           <style>{css}</style>
-          <div style={S.inner}>
+          <div style={{ ...S.inner, paddingTop: 32 }}>
+            <div style={{ position: "relative", height: 0 }}>
+              <button
+                className="btn-active"
+                onClick={onOpenSettings}
+                style={{
+                  position: "absolute",
+                  top: -8,
+                  right: 0,
+                  background: "rgba(255,255,255,0.1)",
+                  border: "none",
+                  color: TEXT,
+                  width: 40,
+                  height: 40,
+                  borderRadius: "50%",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  fontSize: 18,
+                  fontWeight: 400,
+                  cursor: "pointer",
+                  paddingBottom: 2
+                }}
+              >⚙️</button>
+            </div>
             <div style={{ paddingTop: 20, marginBottom: 40, textAlign: "center" }}>
               <div style={{ fontSize: 14, fontWeight: 800, letterSpacing: "0.15em", color: ACCENT, textTransform: "uppercase", marginBottom: 8 }}>
                 The party game
               </div>
               <div style={{ 
-                fontSize: 64, 
+                fontSize: "clamp(36px, 16vw, 64px)", 
                 fontWeight: 800, 
                 lineHeight: 1.1, 
                 textTransform: "uppercase", 
                 letterSpacing: "-0.03em",
                 position: "relative",
-                display: "inline-block"
+                display: "inline-block",
+                whiteSpace: "nowrap",
               }}>
                 <span>IMP</span>
                 <span style={{ position: "relative", display: "inline-block" }}>
-                  {/* De onzichtbare O houdt de plek exact bezet */}
-                  <span style={{ opacity: 0 }}>O</span> 
-                  
-                  <span 
-                    style={{ 
-                      position: "absolute",
-                      left: "52%", // Iets minder dan 50% trekt hem naar links
-                      top: "50%",
-                      transform: "translate(-50%, -50%)",
-                      fontSize: "0.9em", // Iets kleiner gemaakt
-                      lineHeight: 1,
-                      pointerEvents: "none"
-                    }}
-                  >
-                    🤫
-                  </span>
+                  <span style={{ opacity: 0 }}>O</span>
+                  <span style={{ 
+                    position: "absolute",
+                    left: "52%",
+                    top: "50%",
+                    transform: "translate(-50%, -50%)",
+                    fontSize: "0.9em",
+                    lineHeight: 1,
+                    pointerEvents: "none"
+                  }}>🤫</span>
                 </span>
                 <span>STER</span>
               </div>
@@ -501,7 +724,6 @@
                 Who's most likely to...
               </div>
             </div>
-
             <Card style={{ marginBottom: 20 }}>
               <Tag>Spelers ({players.length}/8)</Tag>
               {players.length > 0 && (
@@ -624,12 +846,15 @@
       </div>
     );
 
-    const ShowQuestionScreen = ({ isImposter, question, isLast, onDone }) => (
-      <div style={{ ...S.page, background: isImposter ? "#1a0b0b" : DARK }}>
+    const ShowQuestionScreen = ({ isImposter, question, isLast, onDone, blindImposter }) => {
+      // Als blinde imposter aan staat, ziet de imposter exact hetzelfde als een gewone speler
+      const showAsImposter = isImposter && !blindImposter;
+      return (
+      <div style={{ ...S.page, background: showAsImposter ? "#1a0b0b" : DARK }}>
         <style>{css}</style>
         <div style={S.inner}>
           <div style={S.contentCenter}>
-            {isImposter && (
+            {showAsImposter && (
               <div style={{
                 display: "inline-block", background: "#3a1212", border: `2px solid #6a1a1a`,
                 borderRadius: 100, padding: "8px 20px", fontSize: 14, fontWeight: 800,
@@ -638,7 +863,7 @@
               😈 Jij bent de imposter
               </div>
             )}
-            <Tag color={isImposter ? RED : ACCENT}>Jouw vraag</Tag>
+            <Tag color={showAsImposter ? RED : ACCENT}>Jouw vraag</Tag>
             <div style={{ fontSize: 32, fontWeight: 800, lineHeight: 1.4, marginBottom: 40, letterSpacing: "-0.02em" }}>
               {question}
             </div>
@@ -648,12 +873,13 @@
           </div>
         </div>
         <div style={S.footer}>
-          <BigBtn onClick={onDone} bg={isImposter ? RED : ACCENT} color={isImposter ? "#fff" : "#111"}>
+          <BigBtn onClick={onDone} bg={showAsImposter ? RED : ACCENT} color={showAsImposter ? "#fff" : "#111"}>
             {isLast ? "Iedereen heeft gelezen" : "Verbergen en doorgeven"}
           </BigBtn>
         </div>
       </div>
-    );
+      );
+    };
 
     const WriteScreen = ({ onReady }) => (
       <div style={S.page}>
@@ -760,26 +986,130 @@ const CountdownScreen = ({ countdown }) => {
       </div>
     );
 
-    const RevealQuestionScreen = ({ normalQuestion, onDone }) => (
-      <div style={S.page}>
-        <style>{css}</style>
-        <div style={S.inner}>
-          <div style={S.contentCenter}>
-            <Tag color={ACCENT}>De vraag was</Tag>
-            <div style={{ fontSize: 32, fontWeight: 800, lineHeight: 1.4, marginBottom: 30, letterSpacing: "-0.02em" }}>
-              {normalQuestion}
-            </div>
-            <Divider />
-            <div style={{ fontSize: 20, color: MUTED, lineHeight: 1.6, fontWeight: 500 }}>
-              Overleg met de groep en wijs dan allemaal <strong style={{color: TEXT}}>tegelijk</strong> naar wie jij denkt dat de imposter is. ☝️
+    // ─── RevealQuestionScreen met optionele discussietimer ────────────────────
+
+    const READING_DELAY = 5; // seconden leestijd voor de timer start
+
+    const RevealQuestionScreen = ({ normalQuestion, onDone, timerEnabled, timerSeconds }) => {
+      const [readingLeft, setReadingLeft] = useState(timerEnabled ? READING_DELAY : 0);
+      const [timeLeft, setTimeLeft] = useState(timerSeconds);
+      const [timerDone, setTimerDone] = useState(false);
+      const intervalRef = useRef(null);
+
+      useEffect(() => {
+        if (!timerEnabled) return;
+
+        // Fase 1: leesvertraging
+        intervalRef.current = setInterval(() => {
+          setReadingLeft(r => {
+            if (r <= 1) {
+              clearInterval(intervalRef.current);
+              // Fase 2: discussietimer starten
+              intervalRef.current = setInterval(() => {
+                setTimeLeft(t => {
+                  if (t <= 1) {
+                    clearInterval(intervalRef.current);
+                    setTimerDone(true);
+                    return 0;
+                  }
+                  return t - 1;
+                });
+              }, 1000);
+              return 0;
+            }
+            return r - 1;
+          });
+        }, 1000);
+
+        return () => clearInterval(intervalRef.current);
+      }, []);
+
+      const isReading = timerEnabled && readingLeft > 0;
+      const progress = timerEnabled && !isReading ? (timeLeft / timerSeconds) : 1;
+      const timerColor = timeLeft <= 10 ? RED : timeLeft <= 20 ? "#e8a547" : GREEN;
+
+      return (
+        <div style={S.page}>
+          <style>{css}</style>
+          <div style={S.inner}>
+            <div style={S.contentCenter}>
+              <Tag color={ACCENT}>De vraag was</Tag>
+              <div style={{ fontSize: 32, fontWeight: 800, lineHeight: 1.4, marginBottom: 30, letterSpacing: "-0.02em" }}>
+                {normalQuestion}
+              </div>
+              <Divider />
+              <div style={{ fontSize: 20, color: MUTED, lineHeight: 1.6, fontWeight: 500 }}>
+                Overleg met de groep en wijs dan allemaal <strong style={{color: TEXT}}>tegelijk</strong> naar wie jij denkt dat de imposter is. ☝️
+              </div>
             </div>
           </div>
+
+          {/* Timer: buiten S.inner, vaste hoogte zodat content nooit verspringt */}
+          {timerEnabled && (
+            <div style={{
+              padding: "12px 24px 20px",
+              maxWidth: "500px",
+              width: "100%",
+              margin: "0 auto",
+              height: 104,
+              display: "flex",
+              flexDirection: "column",
+              justifyContent: "center",
+            }}>
+              {isReading ? (
+                <div style={{ textAlign: "center" }}>
+                  <div style={{ fontSize: 13, fontWeight: 800, letterSpacing: "0.12em", textTransform: "uppercase", color: MUTED, marginBottom: 6 }}>
+                    Timer start over
+                  </div>
+                  <div style={{ fontSize: 36, fontWeight: 800, color: MUTED, letterSpacing: "-0.03em", lineHeight: 1 }}>
+                    {readingLeft}
+                  </div>
+                </div>
+              ) : (
+                <div>
+                  <div style={{ display: "flex", alignItems: "baseline", justifyContent: "center", gap: 8, marginBottom: 10 }}>
+                    <div style={{
+                      fontSize: 44,
+                      fontWeight: 800,
+                      letterSpacing: "-0.03em",
+                      color: timerDone ? RED : timerColor,
+                      transition: "color 0.4s ease",
+                      lineHeight: 1,
+                    }}>
+                      {timerDone ? "⏰" : timeLeft}
+                    </div>
+                    {!timerDone && (
+                      <div style={{ fontSize: 15, color: MUTED, fontWeight: 600 }}>sec</div>
+                    )}
+                  </div>
+                  <div style={{ background: "#222", borderRadius: 100, height: 8, overflow: "hidden" }}>
+                    <div style={{
+                      height: "100%",
+                      borderRadius: 100,
+                      width: `${progress * 100}%`,
+                      background: timerColor,
+                      transition: "width 1s linear, background 0.4s ease",
+                    }} />
+                  </div>
+                  {/* Vaste hoogte reserveren zodat de balk nooit verschuift */}
+                  <div style={{ height: 28, display: "flex", alignItems: "center", justifyContent: "center" }}>
+                    {timerDone && (
+                      <div style={{ fontSize: 14, color: RED, fontWeight: 700 }}>
+                        Tijd is om! Wijs nu aan.
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+
+          <div style={S.footer}>
+            <BigBtn onClick={onDone}>🕵️ Imposter gevonden?</BigBtn>
+          </div>
         </div>
-        <div style={S.footer}>
-          <BigBtn onClick={onDone}>🕵️ Imposter gevonden?</BigBtn>
-        </div>
-      </div>
-    );
+      );
+    };
 
     const ResultScreen = ({ imposterName, normalQ, imposterQ, onFound, onNotFound }) => (
       <div style={S.page}>
@@ -810,10 +1140,12 @@ const CountdownScreen = ({ countdown }) => {
       </div>
     );
 
-    const ScoreboardScreen = ({ players, scores, round, onPlayAgain, onReset }) => {
+    const ScoreboardScreen = ({ players, scores, round, onPlayAgain, onNewGame, onReset, targetEnabled, targetScore }) => {
       const sorted = [...players].sort((a, b) => (scores[b] || 0) - (scores[a] || 0));
       const maxScore = Math.max(...players.map(p => scores[p] || 0), 1);
       const medals = ["🥇", "🥈", "🥉"];
+
+      const winner = targetEnabled ? sorted.find(p => (scores[p] || 0) >= targetScore) : null;
 
       return (
         <div style={S.page}>
@@ -826,21 +1158,40 @@ const CountdownScreen = ({ countdown }) => {
               <div style={{ fontSize: 44, fontWeight: 800, letterSpacing: "-0.03em" }}>Scorebord</div>
             </div>
 
+            {winner && (
+              <div style={{ textAlign: "center", marginBottom: 20 }}>
+                <div style={{ fontSize: 40, marginBottom: 8 }}>🏆</div>
+                <div style={{ fontSize: 22, fontWeight: 800, color: GREEN, marginBottom: 4 }}>{winner} is de winnaar!</div>
+              </div>
+            )}
+
+            {targetEnabled && !winner && (
+              <div style={{ fontSize: 14, color: MUTED, fontWeight: 600, marginBottom: 16, textAlign: "right" }}>
+                Doel: {targetScore} punten
+              </div>
+            )}
+
             <Card style={{ marginBottom: 40, padding: "16px 24px" }}>
               {sorted.map((name, i) => {
                 const score = scores[name] || 0;
+                const isWinner = name === winner;
                 return (
                   <div key={name}>
                     {i > 0 && <div style={{ height: 2, background: BORDER, margin: "16px 0", borderRadius: 2 }} />}
                     <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
                       <span style={{ fontSize: 28, width: 36, textAlign: "center" }}>{medals[i] || <span style={{fontSize: 18, color: MUTED, fontWeight: 800}}>{i+1}</span>}</span>
                       <div style={{ flex: 1 }}>
-                        <div style={{ fontSize: 20, fontWeight: 800, marginBottom: 8 }}>{name}</div>
+                        <div style={{ fontSize: 20, fontWeight: 800, marginBottom: 8, color: isWinner ? GREEN : TEXT }}>{name}</div>
                         <div style={{ background: "#2a2a2a", borderRadius: 100, height: 8, overflow: "hidden" }}>
-                          <div style={{ height: "100%", borderRadius: 100, width: `${(score / maxScore) * 100}%`, background: i === 0 ? ACCENT : "#666", transition: "width 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275)" }} />
+                          <div style={{ height: "100%", borderRadius: 100, width: `${(score / (targetEnabled ? Math.max(maxScore, targetScore) : maxScore)) * 100}%`, background: isWinner ? GREEN : i === 0 ? ACCENT : "#666", transition: "width 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275)" }} />
                         </div>
+                        {targetEnabled && (
+                          <div style={{ fontSize: 12, color: MUTED, fontWeight: 600, marginTop: 4 }}>
+                            {Math.max(0, targetScore - score)} punt{Math.max(0, targetScore - score) !== 1 ? "en" : ""} te gaan
+                          </div>
+                        )}
                       </div>
-                      <span style={{ fontSize: 28, fontWeight: 800, color: i === 0 ? ACCENT : TEXT, minWidth: 40, textAlign: "right" }}>{score}</span>
+                      <span style={{ fontSize: 28, fontWeight: 800, color: isWinner ? GREEN : i === 0 ? ACCENT : TEXT, minWidth: 40, textAlign: "right" }}>{score}</span>
                     </div>
                   </div>
                 );
@@ -848,7 +1199,11 @@ const CountdownScreen = ({ countdown }) => {
             </Card>
           </div>
           <div style={{ ...S.footer, display: "flex", flexDirection: "column", gap: 16 }}>
-            <BigBtn onClick={onPlayAgain}>🚀 Nog een ronde</BigBtn>
+            {winner ? (
+              <BigBtn onClick={onNewGame}>🚀 Nieuw spel</BigBtn>
+            ) : (
+              <BigBtn onClick={onPlayAgain}>🚀 Nog een ronde</BigBtn>
+            )}
             <GhostBtn onClick={onReset}>Terug naar hoofdmenu</GhostBtn>
           </div>
         </div>
@@ -886,6 +1241,16 @@ const CountdownScreen = ({ countdown }) => {
       });
       const [showPrompts, setShowPrompts] = useState(false);
       const [showInstructions, setShowInstructions] = useState(false);
+      const [showSettings, setShowSettings] = useState(false);
+      const [settings, setSettings] = useState(() => {
+        const defaults = { timerEnabled: false, timerSeconds: 60, targetEnabled: false, targetScore: 10, customOnly: false, blindImposter: false };
+        try {
+          const saved = JSON.parse(localStorage.getItem("imposter_settings"));
+          return saved ? { ...defaults, ...saved } : defaults;
+        } catch {
+          return defaults;
+        }
+      });
       const countdownRef = useRef(null);
 
       // ── LocalStorage persistentie ──────────────────────────────────────────
@@ -905,7 +1270,19 @@ const CountdownScreen = ({ countdown }) => {
         try { localStorage.setItem("imposter_available_prompts", JSON.stringify(availablePrompts)); } catch {}
       }, [availablePrompts]);
 
+      useEffect(() => {
+        try { localStorage.setItem("imposter_settings", JSON.stringify(settings)); } catch {}
+      }, [settings]);
+
       // ── Spel starten ───────────────────────────────────────────────────────
+      const startFreshGame = () => {
+        const freshScores = {};
+        players.forEach(p => { freshScores[p] = 0; });
+        setScores(freshScores);
+        setRound(0);
+        setTimeout(() => startGame(players), 0);
+      };
+
       const startGame = (p) => {
         const pl = p || players;
         if (pl.length < 3) return;
@@ -914,13 +1291,18 @@ const CountdownScreen = ({ countdown }) => {
 
         // Gebruik availablePrompts; reset als er te weinig over zijn
         setAvailablePrompts(prev => {
-          const pool = prev.length >= 2 ? prev : [...promptPool];
-          const shuffled = [...pool].sort(() => 0.5 - Math.random());
+          const activePool = settings.customOnly ? customQuestions : promptPool;
+          if (activePool.length < 2) {
+            alert("Niet genoeg vragen! Voeg minstens 2 eigen vragen toe.");
+            return prev;
+          }
+          const pool = prev.filter(q => activePool.includes(q));
+          const refilled = pool.length >= 2 ? pool : [...activePool];
+          const shuffled = [...refilled].sort(() => 0.5 - Math.random());
           const nQ = shuffled[0];
           const iQ = shuffled[1];
           setCurrentNormalQ(nQ);
           setCurrentImposterQ(iQ);
-          // Verwijder de gebruikte vragen uit de beschikbare pool
           return shuffled.slice(2);
         });
         
@@ -1016,15 +1398,22 @@ const CountdownScreen = ({ countdown }) => {
               onClose={() => setShowPrompts(false)} 
             />
           )}
+          {showSettings && (
+            <SettingsModal
+              settings={settings}
+              onSave={setSettings}
+              onClose={() => setShowSettings(false)}
+            />
+          )}
           
           {phase === PHASES.SETUP && (
-            <SetupScreen players={players} newPlayer={newPlayer} setNewPlayer={setNewPlayer} addPlayer={addPlayer} removePlayer={removePlayer} startGame={() => startGame()} onOpenPrompts={() => setShowPrompts(true)} onOpenInstructions={() => setShowInstructions(true)} />
+            <SetupScreen players={players} newPlayer={newPlayer} setNewPlayer={setNewPlayer} addPlayer={addPlayer} removePlayer={removePlayer} startGame={() => startGame()} onOpenPrompts={() => setShowPrompts(true)} onOpenInstructions={() => setShowInstructions(true)} onOpenSettings={() => setShowSettings(true)} />
           )}
           {phase === PHASES.QUESTION_TURN && (
             <QuestionTurnScreen player={players[currentPlayerIdx]} round={round} current={currentPlayerIdx + 1} total={players.length} onShow={() => setPhase(PHASES.SHOW_QUESTION)} />
           )}
           {phase === PHASES.SHOW_QUESTION && (
-            <ShowQuestionScreen isImposter={currentPlayerIdx === imposterIdx} question={currentPlayerIdx === imposterIdx ? currentImposterQ : currentNormalQ} isLast={currentPlayerIdx + 1 === players.length} onDone={doneReading} />
+            <ShowQuestionScreen isImposter={currentPlayerIdx === imposterIdx} question={currentPlayerIdx === imposterIdx ? currentImposterQ : currentNormalQ} isLast={currentPlayerIdx + 1 === players.length} onDone={doneReading} blindImposter={settings.blindImposter} />
           )}
           {phase === PHASES.WRITE && (
             <WriteScreen onReady={startCountdown} />
@@ -1036,13 +1425,27 @@ const CountdownScreen = ({ countdown }) => {
             <ShowNamesScreen onReveal={() => setPhase(PHASES.REVEAL_QUESTION)} />
           )}
           {phase === PHASES.REVEAL_QUESTION && (
-            <RevealQuestionScreen normalQuestion={currentNormalQ} onDone={() => setPhase(PHASES.RESULT)} />
+            <RevealQuestionScreen
+              normalQuestion={currentNormalQ}
+              onDone={() => setPhase(PHASES.RESULT)}
+              timerEnabled={settings.timerEnabled}
+              timerSeconds={settings.timerSeconds}
+            />
           )}
           {phase === PHASES.RESULT && (
             <ResultScreen imposterName={players[imposterIdx]} normalQ={currentNormalQ} imposterQ={currentImposterQ} onFound={() => handleResult(true)} onNotFound={() => handleResult(false)} />
           )}
           {phase === PHASES.SCOREBOARD && (
-            <ScoreboardScreen players={players} scores={scores} round={round} onPlayAgain={() => startGame()} onReset={resetGame} />
+            <ScoreboardScreen
+              players={players}
+              scores={scores}
+              round={round}
+              onPlayAgain={() => startGame()}
+              onNewGame={startFreshGame}
+              onReset={resetGame}
+              targetEnabled={settings.targetEnabled}
+              targetScore={settings.targetScore}
+            />
           )}
         </React.Fragment>
       );
