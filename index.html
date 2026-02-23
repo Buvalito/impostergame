@@ -1284,12 +1284,19 @@ const CountdownScreen = ({ countdown }) => {
       };
 
       const startGame = (p) => {
-        const pl = p || players;
+        // 1. Gebruik de bestaande spelers of de meegegeven lijst
+        let pl = [...(p || players)]; 
         if (pl.length < 3) return;
+
+        // 2. Schud de spelerslijst in willekeurige volgorde
+        pl = pl.sort(() => Math.random() - 0.5);
         
+        // 3. Update de spelers-state zodat de volgorde op het scherm ook klopt
+        setPlayers(pl);
+
+        // De rest van je bestaande logica:
         setImposterIdx(Math.floor(Math.random() * pl.length));
 
-        // Gebruik availablePrompts; reset als er te weinig over zijn
         setAvailablePrompts(prev => {
           const activePool = settings.customOnly ? customQuestions : promptPool;
           if (activePool.length < 2) {
@@ -1375,12 +1382,20 @@ const CountdownScreen = ({ countdown }) => {
       };
 
       const resetGame = () => {
-        setPhase(PHASES.SETUP); setPlayers([]); setRound(0);
-        setScores({}); setImposterIdx(null);
+        setPhase(PHASES.SETUP); 
+        // setPlayers([]) is weggehaald zodat ze blijven staan
+        setRound(0);
+        
+        // Zet de scores van de huidige spelers terug op 0
+        const freshScores = {};
+        players.forEach(p => { freshScores[p] = 0; });
+        setScores(freshScores);
+        
+        setImposterIdx(null);
         setAvailablePrompts([...promptPool]);
         try {
-          localStorage.removeItem("imposter_players");
-          localStorage.removeItem("imposter_scores");
+          // localStorage.removeItem("imposter_players") is weggehaald!
+          localStorage.setItem("imposter_scores", JSON.stringify(freshScores));
           localStorage.removeItem("imposter_available_prompts");
         } catch {}
       };
