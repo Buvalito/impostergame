@@ -108,7 +108,8 @@
 
     const css = `
       @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&display=swap');
-      * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+      * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; user-select: none; -webkit-user-select: none; }
+      input, textarea { user-select: text; -webkit-user-select: text; }
       body { margin: 0; background: ${DARK}; overscroll-behavior-y: none; }
       .btn-active { transition: transform 0.1s ease, filter 0.2s ease; }
       .btn-active:active { transform: scale(0.96); filter: brightness(0.9); }
@@ -211,14 +212,24 @@
     
     const PromptsModal = ({ customQuestions, onAdd, onDelete, onClose }) => {
       const [qText, setQText] = useState("");
+      const [qError, setQError] = useState("");
 
       const handleAdd = () => {
         if (qText.trim()) {
           let suffix = qText.trim();
           if (!suffix.endsWith('?')) suffix += '?';
+          const fullQ = `Wie zou het meest waarschijnlijk ${suffix}`;
           
-          onAdd(`Wie zou het meest waarschijnlijk ${suffix}`);
+          const allQuestions = [...customQuestions, ...INITIAL_PROMPTS];
+          const isDuplicate = allQuestions.some(q => q.toLowerCase() === fullQ.toLowerCase());
+          if (isDuplicate) {
+            setQError("Deze vraag is al toegevoegd.");
+            return;
+          }
+          
+          onAdd(fullQ);
           setQText("");
+          setQError("");
         }
       };
 
@@ -281,7 +292,7 @@
                       className="input-focus" 
                       placeholder="...dit spel winnen?" 
                       value={qText} 
-                      onChange={e => setQText(e.target.value.toLowerCase())}
+                      onChange={e => { setQText(e.target.value.toLowerCase()); if (qError) setQError(""); }}
                       onKeyDown={e => e.key === "Enter" && qText.trim() !== "" && handleAdd()}
                       style={{ 
                         flex: 1, 
@@ -316,6 +327,11 @@
                       +
                     </button>
                   </div>
+                  {qError && (
+                    <div style={{ display: "flex", alignItems: "center", gap: 8, marginTop: 10, color: "#e07070", fontSize: 14, fontWeight: 600 }}>
+                      <span>⚠️</span><span>{qError}</span>
+                    </div>
+                  )}
                 </div>
               </div>
               
@@ -344,9 +360,9 @@
 
     const InstructionsModal = ({ onClose }) => {
       const steps = [
-        { emoji: "🎒", label: "Wat heb je nodig?", text: "1 smartphone + papier en pen per speler (of iets anders om op te schrijven)." },
+        { emoji: "🎒", label: "Wat heb je nodig?", text: "Eén smartphone voor de groep + papier en pen per speler (of iets anders om op te schrijven)." },
         { emoji: "📱", label: "Smartphone doorgeven", text: "Elke speler leest om de beurt discreet zijn vraag. De anderen kijken weg." },
-        { emoji: "😈", label: "Een andere vraag", text: "De imposter krijgt een andere vraag, maar weet zelf (nog) niet welke de rest heeft." },
+        { emoji: "😈", label: "De imposter", text: "Eén speler is de imposter en krijgt een andere vraag. Hij of zij weet (nog) niet welke vraag de anderen hebben." },
         { emoji: "✍️", label: "Schrijf een naam op", text: "Iedereen schrijft discreet op wie bij zijn vraag past. Toon de naam nog niet!" },
         { emoji: "📢", label: "Toon aan de groep", text: "Na het aftellen toont iedereen wat hij of zij heeft opgeschreven." },
         { emoji: "🕵️", label: "Vind de imposter", text: "Iedereen ziet nu de vraag. Overleg en wijs dan allemaal tegelijk aan wie jij denkt dat de imposter is." },
@@ -638,7 +654,7 @@
                 <div style={{ fontSize: 15, fontWeight: 800, color: MUTED, letterSpacing: "-0.01em", marginBottom: 4 }}>
                   Imposter — The Party Game
                 </div>
-                <div style={{ fontSize: 13, color: "#444", fontWeight: 600 }}>versie 1.0.1</div>
+                <div style={{ fontSize: 13, color: "#444", fontWeight: 600 }}>versie 1.0.2</div>
               </div>
 
             </div>
@@ -654,7 +670,7 @@
     // ─── Screens ───────────────────────────────────────────────────────────────
 
     // SetupScreen heeft een eigen inputRef voor autofocus na toevoegen
-    const SetupScreen = ({ players, newPlayer, setNewPlayer, addPlayer, removePlayer, startGame, onOpenPrompts, onOpenInstructions, onOpenSettings }) => {
+    const SetupScreen = ({ players, newPlayer, setNewPlayer, addPlayer, removePlayer, startGame, onOpenPrompts, onOpenInstructions, onOpenSettings, questionError, playerError, setPlayerError }) => {
       const inputRef = useRef(null);
 
       const handleAddPlayer = () => {
@@ -748,26 +764,29 @@
                     const val = e.target.value;
                     const formattedVal = val.charAt(0).toUpperCase() + val.slice(1);
                     setNewPlayer(formattedVal);
+                    if (playerError) setPlayerError("");
                   }}
-                  onKeyDown={e => e.key === "Enter" && newPlayer.trim() !== "" && handleAddPlayer()}
-                  placeholder="Speler toevoegen…"
+                  onKeyDown={e => e.key === "Enter" && newPlayer.trim() !== "" && players.length < 8 && handleAddPlayer()}
+                  placeholder={players.length >= 8 ? "Max. spelers bereikt" : "Speler toevoegen…"}
+                  disabled={players.length >= 8}
                   style={{
                     flex: 1, 
-                    background: "#222", 
+                    background: players.length >= 8 ? "#1a1a1a" : "#222", 
                     border: `2px solid ${BORDER}`, 
                     borderRadius: 16,
                     padding: "15px", 
-                    color: TEXT, 
+                    color: players.length >= 8 ? "#444" : TEXT, 
                     fontSize: 18, 
                     minWidth: 0, 
                     fontWeight: 600, 
-                    fontFamily: "'Outfit', sans-serif"
+                    fontFamily: "'Outfit', sans-serif",
+                    cursor: players.length >= 8 ? "not-allowed" : "text",
                   }}
                 />
                 <button 
-                  className={newPlayer.trim() === "" ? "" : "btn-active"} 
+                  className={newPlayer.trim() === "" || players.length >= 8 ? "" : "btn-active"} 
                   onClick={handleAddPlayer} 
-                  disabled={newPlayer.trim() === ""}
+                  disabled={newPlayer.trim() === "" || players.length >= 8}
                   style={{
                     background: ACCENT, 
                     color: "#111", 
@@ -776,16 +795,21 @@
                     padding: "0 20px", 
                     fontSize: 28, 
                     fontWeight: 700, 
-                    cursor: newPlayer.trim() === "" ? "default" : "pointer", 
+                    cursor: newPlayer.trim() === "" || players.length >= 8 ? "not-allowed" : "pointer", 
                     flexShrink: 0,
-                    opacity: newPlayer.trim() === "" ? 0.3 : 1,
-                    filter: newPlayer.trim() === "" ? "grayscale(0.5)" : "none",
+                    opacity: newPlayer.trim() === "" || players.length >= 8 ? 0.3 : 1,
+                    filter: newPlayer.trim() === "" || players.length >= 8 ? "grayscale(0.5)" : "none",
                     transition: "all 0.3s ease"
                   }}
                 >
                   +
                 </button>
               </div>
+              {playerError && (
+                <div style={{ display: "flex", alignItems: "center", gap: 8, marginTop: 10, color: "#e07070", fontSize: 14, fontWeight: 600 }}>
+                  <span>⚠️</span><span>{playerError}</span>
+                </div>
+              )}
             </Card>
 
             <GhostBtn onClick={onOpenPrompts} style={{ marginBottom: 24 }}>📝 Prompts beheren</GhostBtn>
@@ -802,7 +826,7 @@
                   background: "transparent",
                   border: "none",
                   color: "#e8c547",
-                  fontSize: 15,
+                  fontSize: 16,
                   fontWeight: 600,
                   fontFamily: "'Outfit', sans-serif",
                   cursor: "pointer",
@@ -815,7 +839,24 @@
             </div>
           </div>
           <div style={S.footer}>
-            <BigBtn onClick={startGame} disabled={players.length < 3}>
+            {questionError && (
+              <div style={{
+                background: "#2a1010",
+                border: `1px solid #6a1a1a`,
+                borderRadius: 20,
+                padding: "14px 18px",
+                marginBottom: 12,
+                display: "flex",
+                alignItems: "center",
+                gap: 12,
+              }}>
+                <span style={{ fontSize: 20 }}>⚠️</span>
+                <div style={{ fontSize: 15, fontWeight: 600, color: "#e07070", lineHeight: 1.4 }}>
+                  {questionError}
+                </div>
+              </div>
+            )}
+            <BigBtn onClick={startGame} disabled={players.length < 3 || !!questionError}>
               {players.length < 3 ? `Nog ${3 - players.length} speler${3 - players.length !== 1 ? "s" : ""} nodig` : "🚀 Spel starten"}
             </BigBtn>
           </div>
@@ -1095,7 +1136,7 @@ const CountdownScreen = ({ countdown }) => {
                   <div style={{ height: 28, display: "flex", alignItems: "center", justifyContent: "center" }}>
                     {timerDone && (
                       <div style={{ fontSize: 14, color: RED, fontWeight: 700 }}>
-                        Tijd is om! Wijs nu aan.
+                        Tijd is om! Wijs je verdachte aan.
                       </div>
                     )}
                   </div>
@@ -1218,6 +1259,7 @@ const CountdownScreen = ({ countdown }) => {
         try { return JSON.parse(localStorage.getItem("imposter_players")) || []; } catch { return []; }
       });
       const [newPlayer, setNewPlayer] = useState("");
+      const [roundPlayerOrder, setRoundPlayerOrder] = useState([]);
       const [round, setRound] = useState(0);
       const [currentPlayerIdx, setCurrentPlayerIdx] = useState(0);
       const [imposterIdx, setImposterIdx] = useState(null);
@@ -1251,6 +1293,17 @@ const CountdownScreen = ({ countdown }) => {
           return defaults;
         }
       });
+      const [questionError, setQuestionError] = useState("");
+      const [playerError, setPlayerError] = useState("");
+      
+      // Bereken proactief of er genoeg vragen zijn
+      const activePool = settings.customOnly ? customQuestions : promptPool;
+      const notEnoughQuestions = activePool.length < 2;
+      const effectiveQuestionError = notEnoughQuestions 
+        ? (settings.customOnly 
+            ? "'Enkel eigen vragen' is actief. Voeg minstens 2 vragen toe via 'Prompts beheren' om een spel te starten."
+            : "Niet genoeg vragen om te starten. Voeg minstens 2 eigen vragen toe.")
+        : questionError;
       const countdownRef = useRef(null);
 
       // ── LocalStorage persistentie ──────────────────────────────────────────
@@ -1272,6 +1325,13 @@ const CountdownScreen = ({ countdown }) => {
 
       useEffect(() => {
         try { localStorage.setItem("imposter_settings", JSON.stringify(settings)); } catch {}
+        setQuestionError(""); // Reset fout als instellingen wijzigen
+        // Reset de vragenpool als customOnly wijzigt zodat de pool altijd klopt
+        setAvailablePrompts(settings.customOnly ? [...customQuestions] : [...promptPool]);
+      }, [settings.customOnly]);
+
+      useEffect(() => {
+        try { localStorage.setItem("imposter_settings", JSON.stringify(settings)); } catch {}
       }, [settings]);
 
       // ── Spel starten ───────────────────────────────────────────────────────
@@ -1288,11 +1348,23 @@ const CountdownScreen = ({ countdown }) => {
         let pl = [...(p || players)]; 
         if (pl.length < 3) return;
 
-        // 2. Schud de spelerslijst in willekeurige volgorde
+        // Valideer vragen VOOR de ronde start (ook vanuit scorebord)
+        const currentActivePool = settings.customOnly ? customQuestions : promptPool;
+        if (currentActivePool.length < 2) {
+          setQuestionError(
+            settings.customOnly
+              ? "'Enkel eigen vragen' actief. Voeg minstens 2 vragen toe via 'Prompts beheren'."
+              : "Niet genoeg vragen. Voeg minstens 2 eigen vragen toe."
+          );
+          setPhase(PHASES.SETUP);
+          return;
+        }
+        setQuestionError("");
+
+        // 2. Schud de spelerslijst in willekeurige volgorde voor deze ronde
+        //    (setPlayers wordt NIET aangeroepen, zodat de setupvolgorde behouden blijft)
         pl = pl.sort(() => Math.random() - 0.5);
-        
-        // 3. Update de spelers-state zodat de volgorde op het scherm ook klopt
-        setPlayers(pl);
+        setRoundPlayerOrder(pl);
 
         // De rest van je bestaande logica:
         setImposterIdx(Math.floor(Math.random() * pl.length));
@@ -1300,7 +1372,7 @@ const CountdownScreen = ({ countdown }) => {
         setAvailablePrompts(prev => {
           const activePool = settings.customOnly ? customQuestions : promptPool;
           if (activePool.length < 2) {
-            alert("Niet genoeg vragen! Voeg minstens 2 eigen vragen toe.");
+            setQuestionError("Niet genoeg vragen om te starten. Voeg minstens 2 eigen vragen toe via \"Prompts beheren\".");
             return prev;
           }
           const pool = prev.filter(q => activePool.includes(q));
@@ -1322,6 +1394,7 @@ const CountdownScreen = ({ countdown }) => {
         setCustomQuestions(prev => [...prev, text]);
         setPromptPool(prev => [...prev, text]);
         setAvailablePrompts(prev => [...prev, text]);
+        setQuestionError(""); // Reset fout als er een vraag wordt toegevoegd
       };
 
       const removeCustomPrompt = (textToRemove) => {
@@ -1332,22 +1405,27 @@ const CountdownScreen = ({ countdown }) => {
 
       const addPlayer = () => {
         const name = newPlayer.trim();
-        if (name && !players.includes(name) && players.length < 8) {
+        if (!name) return;
+        if (players.includes(name)) {
+          setPlayerError(`"${name}" is al toegevoegd.`);
+          return;
+        }
+        if (players.length < 8) {
           setPlayers(prev => [...prev, name]);
           setScores(prev => ({ ...prev, [name]: prev[name] || 0 }));
           setNewPlayer("");
+          setPlayerError("");
         }
       };
 
       const removePlayer = (i) => {
-        const name = players[i];
+        // Score wordt bewaard zodat een heringetreden speler met dezelfde naam zijn punten behoudt
         setPlayers(prev => prev.filter((_, idx) => idx !== i));
-        setScores(prev => { const s = { ...prev }; delete s[name]; return s; });
       };
 
       // ── Na het lezen: ga naar volgende speler of naar WRITE ──────────────
       const doneReading = () => {
-        if (currentPlayerIdx + 1 < players.length) {
+        if (currentPlayerIdx + 1 < roundPlayerOrder.length) {
           setCurrentPlayerIdx(i => i + 1);
           setPhase(PHASES.QUESTION_TURN);
         } else {
@@ -1372,9 +1450,9 @@ const CountdownScreen = ({ countdown }) => {
         setScores(prev => {
           const s = { ...prev };
           if (imposterFound) {
-            players.forEach((p, i) => { if (i !== imposterIdx) s[p] = (s[p] || 0) + 1; });
+            roundPlayerOrder.forEach((p, i) => { if (i !== imposterIdx) s[p] = (s[p] || 0) + 1; });
           } else {
-            s[players[imposterIdx]] = (s[players[imposterIdx]] || 0) + 2;
+            s[roundPlayerOrder[imposterIdx]] = (s[roundPlayerOrder[imposterIdx]] || 0) + 2;
           }
           return s;
         });
@@ -1422,13 +1500,13 @@ const CountdownScreen = ({ countdown }) => {
           )}
           
           {phase === PHASES.SETUP && (
-            <SetupScreen players={players} newPlayer={newPlayer} setNewPlayer={setNewPlayer} addPlayer={addPlayer} removePlayer={removePlayer} startGame={() => startGame()} onOpenPrompts={() => setShowPrompts(true)} onOpenInstructions={() => setShowInstructions(true)} onOpenSettings={() => setShowSettings(true)} />
+            <SetupScreen players={players} newPlayer={newPlayer} setNewPlayer={setNewPlayer} addPlayer={addPlayer} removePlayer={removePlayer} startGame={() => startGame()} onOpenPrompts={() => setShowPrompts(true)} onOpenInstructions={() => setShowInstructions(true)} onOpenSettings={() => setShowSettings(true)} questionError={effectiveQuestionError} playerError={playerError} setPlayerError={setPlayerError} />
           )}
           {phase === PHASES.QUESTION_TURN && (
-            <QuestionTurnScreen player={players[currentPlayerIdx]} round={round} current={currentPlayerIdx + 1} total={players.length} onShow={() => setPhase(PHASES.SHOW_QUESTION)} />
+            <QuestionTurnScreen player={roundPlayerOrder[currentPlayerIdx]} round={round} current={currentPlayerIdx + 1} total={roundPlayerOrder.length} onShow={() => setPhase(PHASES.SHOW_QUESTION)} />
           )}
           {phase === PHASES.SHOW_QUESTION && (
-            <ShowQuestionScreen isImposter={currentPlayerIdx === imposterIdx} question={currentPlayerIdx === imposterIdx ? currentImposterQ : currentNormalQ} isLast={currentPlayerIdx + 1 === players.length} onDone={doneReading} blindImposter={settings.blindImposter} />
+            <ShowQuestionScreen isImposter={currentPlayerIdx === imposterIdx} question={currentPlayerIdx === imposterIdx ? currentImposterQ : currentNormalQ} isLast={currentPlayerIdx + 1 === roundPlayerOrder.length} onDone={doneReading} blindImposter={settings.blindImposter} />
           )}
           {phase === PHASES.WRITE && (
             <WriteScreen onReady={startCountdown} />
@@ -1448,7 +1526,7 @@ const CountdownScreen = ({ countdown }) => {
             />
           )}
           {phase === PHASES.RESULT && (
-            <ResultScreen imposterName={players[imposterIdx]} normalQ={currentNormalQ} imposterQ={currentImposterQ} onFound={() => handleResult(true)} onNotFound={() => handleResult(false)} />
+            <ResultScreen imposterName={roundPlayerOrder[imposterIdx]} normalQ={currentNormalQ} imposterQ={currentImposterQ} onFound={() => handleResult(true)} onNotFound={() => handleResult(false)} />
           )}
           {phase === PHASES.SCOREBOARD && (
             <ScoreboardScreen
