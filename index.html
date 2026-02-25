@@ -654,7 +654,7 @@
                 <div style={{ fontSize: 15, fontWeight: 800, color: MUTED, letterSpacing: "-0.01em", marginBottom: 4 }}>
                   Imposter — The Party Game
                 </div>
-                <div style={{ fontSize: 13, color: "#444", fontWeight: 600 }}>versie 1.0.2</div>
+                <div style={{ fontSize: 13, color: "#444", fontWeight: 600 }}>versie 1.0.3</div>
               </div>
 
             </div>
@@ -670,7 +670,7 @@
     // ─── Screens ───────────────────────────────────────────────────────────────
 
     // SetupScreen heeft een eigen inputRef voor autofocus na toevoegen
-    const SetupScreen = ({ players, newPlayer, setNewPlayer, addPlayer, removePlayer, startGame, onOpenPrompts, onOpenInstructions, onOpenSettings, questionError, playerError, setPlayerError }) => {
+    const SetupScreen = ({ players, newPlayer, setNewPlayer, addPlayer, removePlayer, startGame, onOpenPrompts, onOpenInstructions, onOpenSettings, questionError, playerError, setPlayerError, settings = {} }) => {
       const inputRef = useRef(null);
 
       const handleAddPlayer = () => {
@@ -684,28 +684,43 @@
           <style>{css}</style>
           <div style={{ ...S.inner, paddingTop: 32 }}>
             <div style={{ position: "relative", height: 0 }}>
-              <button
-                className="btn-active"
-                onClick={onOpenSettings}
-                style={{
-                  position: "absolute",
-                  top: -8,
-                  right: 0,
-                  background: "rgba(255,255,255,0.1)",
-                  border: "none",
-                  color: TEXT,
-                  width: 40,
-                  height: 40,
-                  borderRadius: "50%",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  fontSize: 18,
-                  fontWeight: 400,
-                  cursor: "pointer",
-                  paddingBottom: 2
-                }}
-              >⚙️</button>
+              <div style={{ position: "absolute", top: -8, right: 0 }}>
+                <button
+                  className="btn-active"
+                  onClick={onOpenSettings}
+                  style={{
+                    position: "relative",
+                    background: "rgba(255,255,255,0.1)",
+                    border: "none",
+                    color: TEXT,
+                    width: 40,
+                    height: 40,
+                    borderRadius: "50%",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    fontSize: 18,
+                    fontWeight: 400,
+                    cursor: "pointer",
+                    paddingBottom: 2,
+                  }}
+                >
+                  ⚙️
+                  {(settings.timerEnabled || settings.blindImposter || settings.targetEnabled || settings.customOnly) && (
+                    <span style={{
+                      position: "absolute",
+                      top: 6,
+                      right: 6,
+                      width: 10,
+                      height: 10,
+                      borderRadius: "50%",
+                      background: ACCENT,
+                      border: `2px solid ${DARK}`,
+                      pointerEvents: "none",
+                    }} />
+                  )}
+                </button>
+              </div>
             </div>
             <div style={{ paddingTop: 20, marginBottom: 40, textAlign: "center" }}>
               <div style={{ fontSize: 14, fontWeight: 800, letterSpacing: "0.15em", color: ACCENT, textTransform: "uppercase", marginBottom: 8 }}>
@@ -740,6 +755,8 @@
                 Who's most likely to...
               </div>
             </div>
+
+
             <Card style={{ marginBottom: 20 }}>
               <Tag>Spelers ({players.length}/8)</Tag>
               {players.length > 0 && (
@@ -812,7 +829,26 @@
               )}
             </Card>
 
-            <GhostBtn onClick={onOpenPrompts} style={{ marginBottom: 24 }}>📝 Prompts beheren</GhostBtn>
+            {/* ── Actieve instellingen ── */}
+            {(settings.timerEnabled || settings.blindImposter || settings.targetEnabled || settings.customOnly) && (
+              <div className="btn-active" onClick={onOpenSettings} style={{ display: "flex", gap: 6, flexWrap: "wrap", marginBottom: 16, cursor: "pointer", paddingLeft: 2 }}>
+                {[
+                  settings.timerEnabled && { label: `⏱ ${settings.timerSeconds}s` },
+                  settings.targetEnabled && { label: `🏆 ${settings.targetScore} pt` },
+                  settings.customOnly && { label: "📝 Eigen vragen" },
+                  settings.blindImposter && { label: "🙈 Blind" },
+                ].filter(Boolean).map((p, i) => (
+                  <span key={i} style={{
+                    fontSize: 12, fontWeight: 700,
+                    padding: "3px 10px", borderRadius: 100,
+                    background: `${ACCENT}15`, color: ACCENT,
+                    border: `1px solid ${ACCENT}30`,
+                  }}>{p.label}</span>
+                ))}
+              </div>
+            )}
+
+            <GhostBtn onClick={onOpenPrompts} style={{ marginBottom: 24 }}>{"📝 Prompts beheren"}</GhostBtn>
 
             <div style={{ fontSize: 16, color: MUTED, lineHeight: 1.6, fontWeight: 500, padding: "0 10px" }}>
               <div style={{ marginBottom: 8 }}><strong style={{ color: TEXT }}>1.</strong> 📖 Lees je geheime vraag</div>
@@ -1243,7 +1279,7 @@ const CountdownScreen = ({ countdown }) => {
             {winner ? (
               <BigBtn onClick={onNewGame}>🚀 Nieuw spel</BigBtn>
             ) : (
-              <BigBtn onClick={onPlayAgain}>🚀 Nog een ronde</BigBtn>
+              <BigBtn onClick={onPlayAgain}>🚀 Volgende ronde</BigBtn>
             )}
             <GhostBtn onClick={onReset}>Terug naar hoofdmenu</GhostBtn>
           </div>
@@ -1478,8 +1514,39 @@ const CountdownScreen = ({ countdown }) => {
         } catch {}
       };
 
+      const stopGame = () => {
+        resetGame();
+      };
+
+      const isInGame = phase !== PHASES.SETUP;
+
       return (
         <React.Fragment>
+          {isInGame && (
+            <button
+              className="btn-active"
+              onClick={stopGame}
+              style={{
+                position: "fixed",
+                top: 24,
+                right: "max(24px, calc((100vw - 500px) / 2 + 24px))",
+                background: "rgba(255,255,255,0.1)",
+                border: "none",
+                color: TEXT,
+                width: 40,
+                height: 40,
+                borderRadius: "50%",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                fontSize: 24,
+                fontWeight: 400,
+                cursor: "pointer",
+                flexShrink: 0,
+                zIndex: 50,
+              }}
+            >×</button>
+          )}
           {showInstructions && (
             <InstructionsModal onClose={() => setShowInstructions(false)} />
           )}
@@ -1500,7 +1567,7 @@ const CountdownScreen = ({ countdown }) => {
           )}
           
           {phase === PHASES.SETUP && (
-            <SetupScreen players={players} newPlayer={newPlayer} setNewPlayer={setNewPlayer} addPlayer={addPlayer} removePlayer={removePlayer} startGame={() => startGame()} onOpenPrompts={() => setShowPrompts(true)} onOpenInstructions={() => setShowInstructions(true)} onOpenSettings={() => setShowSettings(true)} questionError={effectiveQuestionError} playerError={playerError} setPlayerError={setPlayerError} />
+            <SetupScreen players={players} newPlayer={newPlayer} setNewPlayer={setNewPlayer} addPlayer={addPlayer} removePlayer={removePlayer} startGame={() => startGame()} onOpenPrompts={() => setShowPrompts(true)} onOpenInstructions={() => setShowInstructions(true)} onOpenSettings={() => setShowSettings(true)} questionError={effectiveQuestionError} playerError={playerError} setPlayerError={setPlayerError} settings={settings} />
           )}
           {phase === PHASES.QUESTION_TURN && (
             <QuestionTurnScreen player={roundPlayerOrder[currentPlayerIdx]} round={round} current={currentPlayerIdx + 1} total={roundPlayerOrder.length} onShow={() => setPhase(PHASES.SHOW_QUESTION)} />
