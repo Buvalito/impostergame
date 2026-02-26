@@ -571,7 +571,7 @@
             padding: "24px 24px calc(24px + env(safe-area-inset-bottom))"
           }}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 36 }}>
-              <h2 style={{ fontSize: 24, fontWeight: 800, color: TEXT, letterSpacing: "-0.02em", margin: 0 }}>Instellingen</h2>
+              <h2 style={{ fontSize: 24, fontWeight: 800, color: TEXT, letterSpacing: "-0.02em", margin: 0 }}>Spelinstellingen</h2>
               <button
                 onClick={onClose}
                 className="btn-active"
@@ -690,9 +690,15 @@
                   onClick={onOpenSettings}
                   style={{
                     position: "relative",
-                    background: "rgba(255,255,255,0.1)",
-                    border: "none",
-                    color: TEXT,
+                    background: (settings.timerEnabled || settings.blindImposter || settings.targetEnabled || settings.customOnly)
+                      ? `${ACCENT}30`
+                      : "rgba(255,255,255,0.1)",
+                    border: (settings.timerEnabled || settings.blindImposter || settings.targetEnabled || settings.customOnly)
+                      ? `1px solid ${ACCENT}30`
+                      : "1px solid transparent",
+                    color: (settings.timerEnabled || settings.blindImposter || settings.targetEnabled || settings.customOnly)
+                      ? ACCENT
+                      : TEXT,
                     width: 40,
                     height: 40,
                     borderRadius: "50%",
@@ -703,22 +709,10 @@
                     fontWeight: 400,
                     cursor: "pointer",
                     paddingBottom: 2,
+                    transition: "background 0.2s, border 0.2s",
                   }}
                 >
                   ⚙️
-                  {(settings.timerEnabled || settings.blindImposter || settings.targetEnabled || settings.customOnly) && (
-                    <span style={{
-                      position: "absolute",
-                      top: 6,
-                      right: 6,
-                      width: 10,
-                      height: 10,
-                      borderRadius: "50%",
-                      background: ACCENT,
-                      border: `2px solid ${DARK}`,
-                      pointerEvents: "none",
-                    }} />
-                  )}
                 </button>
               </div>
             </div>
@@ -833,10 +827,10 @@
             {(settings.timerEnabled || settings.blindImposter || settings.targetEnabled || settings.customOnly) && (
               <div className="btn-active" onClick={onOpenSettings} style={{ display: "flex", gap: 6, flexWrap: "wrap", marginBottom: 16, cursor: "pointer", paddingLeft: 2 }}>
                 {[
-                  settings.timerEnabled && { label: `⏱ ${settings.timerSeconds}s` },
+                  settings.timerEnabled && { label: `⏲️ ${settings.timerSeconds}s` },
                   settings.targetEnabled && { label: `🏆 ${settings.targetScore} pt` },
-                  settings.customOnly && { label: "📝 Eigen vragen" },
-                  settings.blindImposter && { label: "🙈 Blind" },
+                  settings.customOnly && { label: "📝 Enkel eigen vragen" },
+                  settings.blindImposter && { label: "🙈 Blinde imposter" },
                 ].filter(Boolean).map((p, i) => (
                   <span key={i} style={{
                     fontSize: 12, fontWeight: 700,
