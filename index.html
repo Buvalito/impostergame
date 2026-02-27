@@ -119,6 +119,15 @@
         from { opacity: 0; transform: translateY(8px); }
         to   { opacity: 1; transform: translateY(0); }
       }
+      @keyframes startPulse {
+        0%, 100% { box-shadow: 0 8px 32px ${ACCENT}40; }
+        50%       { box-shadow: 0 8px 48px ${ACCENT}70; }
+      }
+      @keyframes badgePop {
+        0%   { transform: scale(0.8); opacity: 0; }
+        60%  { transform: scale(1.1); }
+        100% { transform: scale(1); opacity: 1; }
+      }
     `;
 
     const S = {
@@ -213,6 +222,15 @@
     const PromptsModal = ({ customQuestions, onAdd, onDelete, onClose }) => {
       const [qText, setQText] = useState("");
       const [qError, setQError] = useState("");
+      const [hidden, setHidden] = useState(() => {
+        try { return localStorage.getItem("imposter_prompts_hidden") === "true"; } catch { return false; }
+      });
+
+      const toggleHidden = () => setHidden(h => {
+        const next = !h;
+        try { localStorage.setItem("imposter_prompts_hidden", String(next)); } catch {}
+        return next;
+      });
 
       const handleAdd = () => {
         if (qText.trim()) {
@@ -237,11 +255,9 @@
         <div style={{ 
           position: "fixed", 
           inset: 0, 
-          // Achtergrond iets transparanter maken (0.8 ipv 0.99) voor beter blur-effect
           background: "rgba(17,17,17,0.9)", 
-          // De magische regel voor de blur:
           backdropFilter: "blur(12px)", 
-          WebkitBackdropFilter: "blur(12px)", // Voor Safari ondersteuning
+          WebkitBackdropFilter: "blur(12px)",
           zIndex: 100, 
           display: "flex", 
           flexDirection: "column", 
@@ -256,34 +272,34 @@
             height: "100%", 
             display: "flex", 
             flexDirection: "column", 
-            padding: "24px 24px calc(24px + env(safe-area-inset-bottom))" // Rekening houden met inkeping onderaan mobiel
+            padding: "24px 24px calc(24px + env(safe-area-inset-bottom))"
           }}>
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 32 }}>
-              <h2 style={{ fontSize: 24, fontWeight: 800, color: TEXT, letterSpacing: "-0.02em" }}>Prompts beheren</h2>
-              <button 
-                onClick={onClose} 
-                className="btn-active"
-                style={{ 
-                  background: "rgba(255,255,255,0.1)", // Subtielere knop passend bij blur
-                  border: "none", 
-                  color: TEXT, 
-                  width: 40, 
-                  height: 40, 
-                  borderRadius: "50%", 
-                  display: "flex", 
-                  alignItems: "center", 
-                  justifyContent: "center", 
-                  fontSize: 24, 
-                  fontWeight: 400,
-                  cursor: "pointer"
-                }}
-              >
-                ×
-              </button>
-            </div>
-            
-            <div style={{ flex: 1, overflowY: "auto" }}>
-              <div style={{ marginBottom: 32 }}>
+
+            {/* ── Sticky top: titel + invoer + sectieheader ── */}
+            <div style={{ flexShrink: 0 }}>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 32 }}>
+                <h2 style={{ fontSize: 24, fontWeight: 800, color: TEXT, letterSpacing: "-0.02em" }}>Prompts beheren</h2>
+                <button 
+                  onClick={onClose} 
+                  className="btn-active"
+                  style={{ 
+                    background: "rgba(255,255,255,0.1)",
+                    border: "none", 
+                    color: TEXT, 
+                    width: 40, 
+                    height: 40, 
+                    borderRadius: "50%", 
+                    display: "flex", 
+                    alignItems: "center", 
+                    justifyContent: "center", 
+                    fontSize: 24, 
+                    fontWeight: 400,
+                    cursor: "pointer"
+                  }}
+                >×</button>
+              </div>
+
+              <div style={{ marginBottom: 28 }}>
                 <Tag color={ACCENT}>Voeg een vraag toe</Tag>
                 <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
                   <div style={{ fontSize: 16, color: TEXT, fontWeight: 600 }}>Wie zou het meest waarschijnlijk</div>
@@ -292,7 +308,12 @@
                       className="input-focus" 
                       placeholder="...dit spel winnen?" 
                       value={qText} 
-                      onChange={e => { setQText(e.target.value.toLowerCase()); if (qError) setQError(""); }}
+                      onChange={e => { 
+                        const val = e.target.value;
+                        const formatted = val.length > 0 ? val.charAt(0).toLowerCase() + val.slice(1) : val;
+                        setQText(formatted); 
+                        if (qError) setQError(""); 
+                      }}
                       onKeyDown={e => e.key === "Enter" && qText.trim() !== "" && handleAdd()}
                       style={{ 
                         flex: 1, 
@@ -323,9 +344,7 @@
                         filter: qText.trim() === "" ? "grayscale(0.5)" : "none",
                         transition: "all 0.3s ease"
                       }}
-                    >
-                      +
-                    </button>
+                    >+</button>
                   </div>
                   {qError && (
                     <div style={{ display: "flex", alignItems: "center", gap: 8, marginTop: 10, color: "#e07070", fontSize: 14, fontWeight: 600 }}>
@@ -334,23 +353,66 @@
                   )}
                 </div>
               </div>
-              
-              <Tag>Jouw toegevoegde vragen</Tag>
+
+              {/* ── Sectieheader met verberg-toggle ── */}
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 10, gap: 8 }}>
+                <span style={{ fontSize: 11, fontWeight: 800, letterSpacing: "0.12em", textTransform: "uppercase", color: MUTED }}>
+                  Toegevoegde vragen {customQuestions.length > 0 && `(${customQuestions.length})`}
+                </span>
+                {customQuestions.length > 0 && (
+                  <button
+                    className="btn-active"
+                    onClick={() => toggleHidden()}
+                    style={{
+                      background: `${ACCENT}15`,
+                      border: `1px solid ${ACCENT}30`,
+                      borderRadius: 100,
+                      padding: "3px 10px",
+                      fontSize: 16,
+                      fontWeight: 700,
+                      color: `${ACCENT}`,
+                      cursor: "pointer",
+                      fontFamily: "'Outfit', sans-serif",
+                      flexShrink: 0,
+                      whiteSpace: "nowrap",
+                    }}
+                  >
+                    {hidden ? "👁️" : "🙈"}
+                  </button>
+                )}
+              </div>
+            </div>
+
+            {/* ── Scrollbare lijst ── */}
+            <div style={{ flex: 1, overflowY: "auto" }}>
               {customQuestions.length === 0 ? (
                 <div style={{ color: MUTED, fontSize: 16, textAlign: "center", marginTop: 20 }}>Nog geen eigen vragen toegevoegd.</div>
               ) : (
                 customQuestions.slice().reverse().map((q, idx) => (
                   <div key={idx} style={{ padding: "16px 0", borderBottom: `1px solid ${BORDER}`, display: "flex", justifyContent: "space-between", alignItems: "center", gap: 12 }}>
-                    <div style={{ color: TEXT, fontSize: 16, fontWeight: 500, lineHeight: 1.4 }}>
-                      {q}
+                    <div style={{ flex: 1, lineHeight: 1.4 }}>
+                      {hidden ? (
+                        <div style={{ display: "flex", flexDirection: "column", gap: 7 }}>
+                          <div style={{ height: 11, borderRadius: 6, background: "#2e2e2e", width: `${50 + (idx * 37 + 17) % 38}%` }} />
+                          <div style={{ height: 11, borderRadius: 6, background: "#272727", width: `${28 + (idx * 53 + 7) % 36}%` }} />
+                        </div>
+                      ) : (
+                        <div style={{ color: TEXT, fontSize: 16, fontWeight: 500 }}>{q}</div>
+                      )}
                     </div>
-                    <button onClick={() => onDelete(q)} className="btn-active" style={{ background: RED, color: "#fff", border: "none", borderRadius: "50%", width: 32, height: 32, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 18, fontWeight: 800, cursor: "pointer", flexShrink: 0 }}>
+                    <button onClick={() => !hidden && onDelete(q)} className={hidden ? "" : "btn-active"} style={{ background: hidden ? "#2a2a2a" : RED, color: "#fff", border: "none", borderRadius: "50%", width: 32, height: 32, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 18, fontWeight: 800, cursor: hidden ? "default" : "pointer", flexShrink: 0, opacity: hidden ? 0.2 : 1, transition: "all 0.2s ease" }}>
                       ×
                     </button>
                   </div>
                 ))
               )}
             </div>
+
+            {/* ── Klaar knop ── */}
+            <div style={{ paddingTop: 16 }}>
+              <BigBtn onClick={onClose}>Klaar</BigBtn>
+            </div>
+
           </div>
         </div>
       );
@@ -360,11 +422,11 @@
 
     const InstructionsModal = ({ onClose }) => {
       const steps = [
-        { emoji: "🎒", label: "Wat heb je nodig?", text: "Eén smartphone voor de groep + papier en pen per speler (of iets anders om op te schrijven)." },
+        { emoji: "🎒", label: "Benodigdheden", text: "Eén smartphone voor de groep + papier en pen per speler (of iets anders om op te schrijven)." },
         { emoji: "📱", label: "Smartphone doorgeven", text: "Elke speler leest om de beurt discreet zijn vraag. De anderen kijken weg." },
         { emoji: "😈", label: "De imposter", text: "Eén speler is de imposter en krijgt een andere vraag. Hij of zij weet (nog) niet welke vraag de anderen hebben." },
         { emoji: "✍️", label: "Schrijf een naam op", text: "Iedereen schrijft discreet op wie bij zijn vraag past. Toon de naam nog niet!" },
-        { emoji: "📢", label: "Toon aan de groep", text: "Na het aftellen toont iedereen wat hij of zij heeft opgeschreven." },
+        { emoji: "📢", label: "Toon aan de groep", text: "Na het aftellen toont iedereen welke naam hij of zij heeft opgeschreven." },
         { emoji: "🕵️", label: "Vind de imposter", text: "Iedereen ziet nu de vraag. Overleg en wijs dan allemaal tegelijk aan wie jij denkt dat de imposter is." },
       ];
 
@@ -532,20 +594,16 @@
       </div>
     );
 
+    const APP_VERSION = "2.0.0";
+    const LANGUAGES = [
+      { code: "nl", label: "Nederlands"},
+      { code: "en", label: "English"},
+    ];
+
     const SettingsModal = ({ settings, onSave, onClose }) => {
       const [local, setLocal] = useState({ ...settings });
 
       const update = (key, val) => setLocal(prev => ({ ...prev, [key]: val }));
-
-      const SettingRow = ({ label, subtitle, right }) => (
-        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 16, paddingBottom: 24, marginBottom: 24, borderBottom: `1px solid ${BORDER}` }}>
-          <div>
-            <div style={{ fontSize: 17, fontWeight: 700, color: TEXT, marginBottom: 5 }}>{label}</div>
-            {subtitle && <div style={{ fontSize: 14, color: MUTED, fontWeight: 500, lineHeight: 1.4 }}>{subtitle}</div>}
-          </div>
-          {right}
-        </div>
-      );
 
       return (
         <div style={{
@@ -570,8 +628,9 @@
             flexDirection: "column",
             padding: "24px 24px calc(24px + env(safe-area-inset-bottom))"
           }}>
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 36 }}>
-              <h2 style={{ fontSize: 24, fontWeight: 800, color: TEXT, letterSpacing: "-0.02em", margin: 0 }}>Spelinstellingen</h2>
+            {/* Header */}
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 32 }}>
+              <h2 style={{ fontSize: 24, fontWeight: 800, color: TEXT, letterSpacing: "-0.02em", margin: 0 }}>Instellingen</h2>
               <button
                 onClick={onClose}
                 className="btn-active"
@@ -595,72 +654,91 @@
 
             <div style={{ flex: 1, overflowY: "auto" }}>
 
-              {/* Discussietimer */}
-              <SettingRow
-                label="Discussietimer"
-                subtitle="Automatisch aftellen tijdens het overleggen."
-                right={<Toggle enabled={local.timerEnabled} onToggle={() => update("timerEnabled", !local.timerEnabled)} />}
-              />
-              {local.timerEnabled && (
-                <div style={{ marginBottom: 24, paddingBottom: 24, borderBottom: `1px solid ${BORDER}` }}>
-                  <div style={{ fontSize: 14, color: MUTED, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", marginBottom: 16 }}>Tijdsduur</div>
-                  <Stepper
-                    value={local.timerSeconds}
-                    onChange={v => update("timerSeconds", v)}
-                    min={15}
-                    max={180}
-                    step={15}
-                    format={v => `${v}s`}
-                  />
+              {/* Taal */}
+              <div style={{ paddingBottom: 24, marginBottom: 4, borderBottom: `1px solid ${BORDER}` }}>
+                <div style={{ display: "flex", alignItems: "center", gap: 14, marginBottom: 6 }}>
+                  <span style={{ fontSize: 22, lineHeight: 1 }}>🌐</span>
+                  <div>
+                    <div style={{ fontSize: 17, fontWeight: 700, color: TEXT, marginBottom: 5 }}>Taal</div>
+                    <div style={{ fontSize: 14, color: MUTED, fontWeight: 500 }}>Kies de taal van de app.</div>
+                  </div>
                 </div>
-              )}
-
-              {/* Doelstand */}
-              <SettingRow
-                label="Eindscore"
-                subtitle="Het spel eindigt als iemand dit aantal punten haalt."
-                right={<Toggle enabled={local.targetEnabled} onToggle={() => update("targetEnabled", !local.targetEnabled)} />}
-              />
-              {local.targetEnabled && (
-                <div style={{ marginBottom: 24, paddingBottom: 24, borderBottom: `1px solid ${BORDER}` }}>
-                  <div style={{ fontSize: 14, color: MUTED, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", marginBottom: 16 }}>Punten om te winnen</div>
-                  <Stepper
-                    value={local.targetScore}
-                    onChange={v => update("targetScore", v)}
-                    min={3}
-                    max={30}
-                    step={1}
-                    format={v => `${v} pt`}
-                  />
+                <div style={{ display: "flex", gap: 10, paddingLeft: 36, marginTop: 14 }}>
+                  {LANGUAGES.map(lang => (
+                    <button
+                      key={lang.code}
+                      className="btn-active"
+                      onClick={() => update("language", lang.code)}
+                      style={{
+                        flex: 1,
+                        padding: "12px 10px",
+                        borderRadius: 14,
+                        border: `2px solid ${(local.language || "nl") === lang.code ? ACCENT : BORDER}`,
+                        background: (local.language || "nl") === lang.code ? `${ACCENT}15` : "#1a1a1a",
+                        color: (local.language || "nl") === lang.code ? ACCENT : MUTED,
+                        fontFamily: "'Outfit', sans-serif",
+                        fontSize: 14,
+                        fontWeight: 700,
+                        cursor: "pointer",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        gap: 8,
+                        transition: "all 0.15s ease",
+                      }}
+                    >
+                      <span style={{ fontSize: 18 }}>{lang.flag}</span>
+                      {lang.label}
+                    </button>
+                  ))}
                 </div>
-              )}
-
-              {/* Alleen eigen vragen */}
-              <SettingRow
-                label="Enkel eigen vragen"
-                subtitle="Schakelt de standaardvragen uit. Enkel jouw toegevoegde prompts worden gebruikt."
-                right={<Toggle enabled={local.customOnly} onToggle={() => update("customOnly", !local.customOnly)} />}
-              />
-
-              {/* Blinde imposter */}
-              <SettingRow
-                label="Blinde imposter"
-                subtitle="De imposter krijgt een andere vraag, maar weet zelf niet dat hij/zij de imposter is."
-                right={<Toggle enabled={local.blindImposter} onToggle={() => update("blindImposter", !local.blindImposter)} />}
-              />
-
-              {/* App info */}
-              <div style={{ paddingTop: 8, textAlign: "center", paddingBottom: 10 }}>
-                <div style={{ fontSize: 15, fontWeight: 800, color: MUTED, letterSpacing: "-0.01em", marginBottom: 4 }}>
-                  Imposter — The Party Game
+                <div style={{ fontSize: 12, color: "#555", fontWeight: 600, marginTop: 10, paddingLeft: 36 }}>
+                  Meer talen volgen in een toekomstige update.
                 </div>
-                <div style={{ fontSize: 13, color: "#444", fontWeight: 600 }}>versie 1.0.3</div>
+              </div>
+
+              {/* Over de app */}
+              <div style={{ padding: "20px 0", borderBottom: `1px solid ${BORDER}` }}>
+                <div style={{ display: "flex", alignItems: "center", gap: 14, marginBottom: 16 }}>
+                  <span style={{ fontSize: 22, lineHeight: 1 }}>📱</span>
+                  <div style={{ fontSize: 17, fontWeight: 700, color: TEXT }}>Over de app</div>
+                </div>
+                <div style={{ paddingLeft: 36, display: "flex", flexDirection: "column", gap: 12 }}>
+                  {[
+                    { label: "App naam", value: "Imposter — The Party Game" },
+                    { label: "Versie", value: APP_VERSION },
+                  ].map(item => (
+                    <div key={item.label} style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                      <span style={{ fontSize: 14, color: MUTED, fontWeight: 600 }}>{item.label}</span>
+                      <span style={{ fontSize: 14, color: TEXT, fontWeight: 700 }}>{item.value}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Juridisch */}
+              <div style={{ padding: "20px 0" }}>
+                <div style={{ display: "flex", alignItems: "center", gap: 14, marginBottom: 14 }}>
+                  <span style={{ fontSize: 22, lineHeight: 1 }}>📄</span>
+                  <div style={{ fontSize: 17, fontWeight: 700, color: TEXT }}>Juridisch</div>
+                </div>
+                <div style={{ paddingLeft: 36, display: "flex", flexDirection: "column" }}>
+                  {["Privacybeleid", "Gebruiksvoorwaarden"].map(item => (
+                    <div key={item} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "12px 0", borderBottom: `1px solid ${BORDER}` }}>
+                      <span style={{ fontSize: 15, color: MUTED, fontWeight: 600 }}>{item}</span>
+                      <span style={{ fontSize: 18, color: "#444" }}>›</span>
+                    </div>
+                  ))}
+                </div>
+                <div style={{ fontSize: 12, color: "#444", fontWeight: 600, marginTop: 12, paddingLeft: 36 }}>
+                  Meer informatie volgt in een toekomstige update.
+                </div>
               </div>
 
             </div>
 
             <div style={{ paddingTop: 16 }}>
-              <BigBtn onClick={() => { onSave(local); onClose(); }}>Opslaan</BigBtn>
+              <BigBtn onClick={() => { onSave(local); onClose(); }}>Sluiten</BigBtn>
             </div>
           </div>
         </div>
@@ -670,60 +748,53 @@
     // ─── Screens ───────────────────────────────────────────────────────────────
 
     // SetupScreen heeft een eigen inputRef voor autofocus na toevoegen
-    const SetupScreen = ({ players, newPlayer, setNewPlayer, addPlayer, removePlayer, startGame, onOpenPrompts, onOpenInstructions, onOpenSettings, questionError, playerError, setPlayerError, settings = {} }) => {
+    const SetupScreen = ({ players, newPlayer, setNewPlayer, addPlayer, removePlayer, startGame, onOpenPrompts, onOpenInstructions, onOpenSettings, questionError, playerError, setPlayerError, settings = {}, onUpdateSettings }) => {
       const inputRef = useRef(null);
 
       const handleAddPlayer = () => {
         addPlayer();
-        // Focus het inputveld direct na toevoegen, ook op mobiel
         setTimeout(() => inputRef.current && inputRef.current.focus(), 0);
       };
+
+      const updateSetting = (key, val) => {
+        if (onUpdateSettings) onUpdateSettings(key, val);
+      };
+
+      const canStart = players.length >= 3 && !questionError;
+
+      const SettingRow = ({ emoji, label, subtitle, settingKey, currentValue, noBorder, invertToggle }) => (
+        <div style={{ 
+          display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 12,
+          padding: "14px 0",
+          borderBottom: noBorder ? "none" : `1px solid ${BORDER}`,
+        }}>
+          <div style={{ display: "flex", alignItems: "flex-start", gap: 14, flex: 1 }}>
+            <span style={{ fontSize: 22, flexShrink: 0, lineHeight: 1, marginTop: 1 }}>{emoji}</span>
+            <div>
+              <div style={{ fontSize: 15, fontWeight: 700, color: TEXT, marginBottom: subtitle ? 5 : 0 }}>{label}</div>
+              {subtitle && <div style={{ fontSize: 12, color: MUTED, fontWeight: 500, lineHeight: 1.4 }}>{subtitle}</div>}
+            </div>
+          </div>
+          <div style={{ marginTop: 2 }}>
+            <Toggle enabled={invertToggle ? !currentValue : currentValue} onToggle={() => updateSetting(settingKey, !currentValue)} />
+          </div>
+        </div>
+      );
 
       return (
         <div style={S.page}>
           <style>{css}</style>
-          <div style={{ ...S.inner, paddingTop: 32 }}>
-            <div style={{ position: "relative", height: 0 }}>
-              <div style={{ position: "absolute", top: -8, right: 0 }}>
-                <button
-                  className="btn-active"
-                  onClick={onOpenSettings}
-                  style={{
-                    position: "relative",
-                    background: (settings.timerEnabled || settings.blindImposter || settings.targetEnabled || settings.customOnly)
-                      ? `${ACCENT}15`
-                      : "rgba(255,255,255,0.1)",
-                    border: (settings.timerEnabled || settings.blindImposter || settings.targetEnabled || settings.customOnly)
-                      ? `1px solid ${ACCENT}45`
-                      : "1px solid transparent",
-                    color: (settings.timerEnabled || settings.blindImposter || settings.targetEnabled || settings.customOnly)
-                      ? ACCENT
-                      : TEXT,
-                    width: 40,
-                    height: 40,
-                    borderRadius: "50%",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    fontSize: 18,
-                    fontWeight: 400,
-                    cursor: "pointer",
-                    paddingBottom: 2,
-                    transition: "background 0.2s, border 0.2s",
-                  }}
-                >
-                  ⚙️
-                </button>
-              </div>
-            </div>
-            <div style={{ paddingTop: 20, marginBottom: 40, textAlign: "center" }}>
-              <div style={{ fontSize: 14, fontWeight: 800, letterSpacing: "0.15em", color: ACCENT, textTransform: "uppercase", marginBottom: 8 }}>
+          <div style={{ ...S.inner, paddingTop: 32, gap: 0 }}>
+
+            {/* ── Header / Logo ── */}
+            <div style={{ textAlign: "center", marginBottom: 32 }}>
+              <div style={{ fontSize: 12, fontWeight: 800, letterSpacing: "0.2em", color: ACCENT, textTransform: "uppercase", marginBottom: 10 }}>
                 The party game
               </div>
               <div style={{ 
-                fontSize: "clamp(36px, 16vw, 64px)", 
+                fontSize: "clamp(42px, 16vw, 68px)", 
                 fontWeight: 800, 
-                lineHeight: 1.1, 
+                lineHeight: 1, 
                 textTransform: "uppercase", 
                 letterSpacing: "-0.03em",
                 position: "relative",
@@ -734,39 +805,95 @@
                 <span style={{ position: "relative", display: "inline-block" }}>
                   <span style={{ opacity: 0 }}>O</span>
                   <span style={{ 
-                    position: "absolute",
-                    left: "52%",
-                    top: "50%",
+                    position: "absolute", left: "52%", top: "50%",
                     transform: "translate(-50%, -50%)",
-                    fontSize: "0.9em",
-                    lineHeight: 1,
-                    pointerEvents: "none"
+                    fontSize: "0.9em", lineHeight: 1, pointerEvents: "none"
                   }}>🤫</span>
                 </span>
                 <span>STER</span>
               </div>
-              <div style={{ fontSize: 18, color: MUTED, marginTop: 8, fontWeight: 500 }}>
+              <div style={{ fontSize: 16, color: MUTED, marginTop: 10, fontWeight: 500 }}>
                 Who's most likely to...
               </div>
             </div>
 
+            {/* ── Action buttons: Instructies + Eigen vragen + Instellingen ── */}
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 10, marginBottom: 14 }}>
+              <button
+                className="btn-active"
+                onClick={onOpenInstructions}
+                style={{
+                  background: `${ACCENT}15`,
+                  border: `1px solid ${ACCENT}30`,
+                  borderRadius: 16,
+                  padding: "14px 12px",
+                  display: "flex", flexDirection: "column", alignItems: "center", gap: 6,
+                  cursor: "pointer", fontFamily: "'Outfit', sans-serif",
+                }}
+              >
+                <span style={{ fontSize: 20 }}>📖</span>
+                <span style={{ fontSize: 12, fontWeight: 700, color: TEXT, lineHeight: 1.2, textAlign: "center" }}>Handleiding</span>
+              </button>
+              <button
+                className="btn-active"
+                onClick={onOpenPrompts}
+                style={{
+                  background: `${ACCENT}15`,
+                  border: `1px solid ${ACCENT}30`,
+                  borderRadius: 16,
+                  padding: "14px 12px",
+                  display: "flex", flexDirection: "column", alignItems: "center", gap: 6,
+                  cursor: "pointer", fontFamily: "'Outfit', sans-serif",
+                  position: "relative",
+                }}
+              >
+                {settings.customOnly && (
+                  <span style={{
+                    position: "absolute", top: -6, right: -6,
+                    background: ACCENT, color: "#111",
+                    borderRadius: 100, fontSize: 9, fontWeight: 800,
+                    padding: "2px 7px", letterSpacing: "0.05em", textTransform: "uppercase",
+                    animation: "badgePop 0.3s ease",
+                  }}>Actief</span>
+                )}
+                <span style={{ fontSize: 20 }}>✏️</span>
+                <span style={{ fontSize: 12, fontWeight: 700, color: TEXT, lineHeight: 1.2, textAlign: "center" }}>Eigen vragen</span>
+              </button>
+              <button
+                onClick={undefined}
+                style={{
+                  background: `${ACCENT}15`,
+                  border: `1px solid ${ACCENT}30`,
+                  borderRadius: 16,
+                  padding: "14px 12px",
+                  display: "flex", flexDirection: "column", alignItems: "center", gap: 6,
+                  cursor: "not-allowed", fontFamily: "'Outfit', sans-serif",
+                  opacity: 0.5,
+                  pointerEvents: "none",
+                }}
+              >
+                <span style={{ fontSize: 20 }}>⚙️</span>
+                <span style={{ fontSize: 12, fontWeight: 700, color: TEXT, lineHeight: 1.2, textAlign: "center" }}>Instellingen</span>
+              </button>
+            </div>
 
-            <Card style={{ marginBottom: 20 }}>
+            {/* ── Spelers ── */}
+            <Card style={{ marginBottom: 14 }}>
               <Tag>Spelers ({players.length}/8)</Tag>
               {players.length > 0 && (
-                <div style={{ display: "flex", flexWrap: "wrap", gap: 10, marginBottom: 24 }}>
+                <div style={{ display: "flex", flexWrap: "wrap", gap: 8, marginBottom: 16 }}>
                   {players.map((p, i) => (
                     <div key={p} className="btn-active" onClick={() => removePlayer(i)} style={{
-                      display: "flex", alignItems: "center", gap: 8, background: "#2a2a2a",
-                      borderRadius: 100, padding: "10px 16px 10px 20px", fontSize: 18, fontWeight: 600, cursor: "pointer"
+                      display: "flex", alignItems: "center", gap: 6, background: "#2a2a2a",
+                      borderRadius: 100, padding: "8px 14px 8px 18px", fontSize: 16, fontWeight: 600, cursor: "pointer"
                     }}>
                       {p}
-                      <div style={{ background: DARK, color: MUTED, borderRadius: "50%", width: 24, height: 24, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 18, fontWeight: 800, paddingBottom: 2 }}>×</div>
+                      <div style={{ background: DARK, color: MUTED, borderRadius: "50%", width: 22, height: 22, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 16, fontWeight: 800, paddingBottom: 2 }}>×</div>
                     </div>
                   ))}
                 </div>
               )}
-              <div style={{ display: "flex", gap: 12 }}>
+              <div style={{ display: "flex", gap: 10 }}>
                 <input
                   ref={inputRef}
                   className="input-focus"
@@ -784,10 +911,10 @@
                     flex: 1, 
                     background: players.length >= 8 ? "#1a1a1a" : "#222", 
                     border: `2px solid ${BORDER}`, 
-                    borderRadius: 16,
-                    padding: "15px", 
+                    borderRadius: 12,
+                    padding: "13px", 
                     color: players.length >= 8 ? "#444" : TEXT, 
-                    fontSize: 18, 
+                    fontSize: 17, 
                     minWidth: 0, 
                     fontWeight: 600, 
                     fontFamily: "'Outfit', sans-serif",
@@ -799,22 +926,15 @@
                   onClick={handleAddPlayer} 
                   disabled={newPlayer.trim() === "" || players.length >= 8}
                   style={{
-                    background: ACCENT, 
-                    color: "#111", 
-                    border: "none", 
-                    borderRadius: 16,
-                    padding: "0 20px", 
-                    fontSize: 28, 
-                    fontWeight: 700, 
+                    background: ACCENT, color: "#111", border: "none", 
+                    borderRadius: 12, padding: "0 18px", fontSize: 26, fontWeight: 700, 
                     cursor: newPlayer.trim() === "" || players.length >= 8 ? "not-allowed" : "pointer", 
                     flexShrink: 0,
                     opacity: newPlayer.trim() === "" || players.length >= 8 ? 0.3 : 1,
                     filter: newPlayer.trim() === "" || players.length >= 8 ? "grayscale(0.5)" : "none",
                     transition: "all 0.3s ease"
                   }}
-                >
-                  +
-                </button>
+                >+</button>
               </div>
               {playerError && (
                 <div style={{ display: "flex", alignItems: "center", gap: 8, marginTop: 10, color: "#e07070", fontSize: 14, fontWeight: 600 }}>
@@ -823,70 +943,52 @@
               )}
             </Card>
 
-            {/* ── Actieve instellingen ── */}
-            {(settings.timerEnabled || settings.blindImposter || settings.targetEnabled || settings.customOnly) && (
-              <div className="btn-active" onClick={onOpenSettings} style={{ display: "flex", gap: 6, flexWrap: "wrap", marginBottom: 16, cursor: "pointer", paddingLeft: 2 }}>
-                {[
-                  settings.timerEnabled && { label: `⏲️ ${settings.timerSeconds}s` },
-                  settings.targetEnabled && { label: `🏆 ${settings.targetScore} pt` },
-                  settings.customOnly && { label: "📝 Enkel eigen vragen" },
-                  settings.blindImposter && { label: "🙈 Blinde imposter" },
-                ].filter(Boolean).map((p, i) => (
-                  <span key={i} style={{
-                    fontSize: 12, fontWeight: 700,
-                    padding: "3px 10px", borderRadius: 100,
-                    background: `${ACCENT}15`, color: ACCENT,
-                    border: `1px solid ${ACCENT}30`,
-                  }}>{p.label}</span>
-                ))}
-              </div>
-            )}
+            {/* ── Spelinstellingen ── */}
+            <Card style={{ marginBottom: 0 }}>
+              <Tag>Spelopties</Tag>
 
-            <GhostBtn onClick={onOpenPrompts} style={{ marginBottom: 24 }}>{"📝 Prompts beheren"}</GhostBtn>
+              <SettingRow emoji="⏱️" label="Discussietimer" subtitle="Automatisch aftellen tijdens het overleggen." settingKey="timerEnabled" currentValue={settings.timerEnabled} />
+              {settings.timerEnabled && (
+                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "10px 0 12px 36px", borderBottom: `1px solid ${BORDER}` }}>
+                  <span style={{ fontSize: 13, fontWeight: 600, color: MUTED }}>Tijdsduur</span>
+                  <Stepper value={settings.timerSeconds} onChange={v => updateSetting("timerSeconds", v)} min={15} max={180} step={15} format={v => `${v}s`} />
+                </div>
+              )}
 
-            <div style={{ fontSize: 16, color: MUTED, lineHeight: 1.6, fontWeight: 500, padding: "0 10px" }}>
-              <div style={{ marginBottom: 8 }}><strong style={{ color: TEXT }}>1.</strong> 📖 Lees je geheime vraag</div>
-              <div style={{ marginBottom: 8 }}><strong style={{ color: TEXT }}>2.</strong> ✍️ Schrijf een naam op</div>
-              <div style={{ marginBottom: 8 }}><strong style={{ color: TEXT }}>3.</strong> 📢 Toon je antwoord aan de groep</div>
-              <div style={{ marginBottom: 16 }}><strong style={{ color: TEXT }}>4.</strong> 🕵️ Vind de imposter</div>
-              <button
-                className="btn-active"
-                onClick={onOpenInstructions}
-                style={{
-                  background: "transparent",
-                  border: "none",
-                  color: "#e8c547",
-                  fontSize: 16,
-                  fontWeight: 600,
-                  fontFamily: "'Outfit', sans-serif",
-                  cursor: "pointer",
-                  textDecoration: "underline",
-                  textDecorationColor: "#333",
-                  padding: 0,
-                  letterSpacing: "0.01em",
-                }}
-              >Meer uitleg →</button>
+              <SettingRow emoji="🏆" label="Eindscore" subtitle="Het spel eindigt als iemand dit aantal punten haalt." settingKey="targetEnabled" currentValue={settings.targetEnabled} />
+              {settings.targetEnabled && (
+                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "10px 0 12px 36px", borderBottom: `1px solid ${BORDER}` }}>
+                  <span style={{ fontSize: 13, fontWeight: 600, color: MUTED }}>Punten om te winnen</span>
+                  <Stepper value={settings.targetScore} onChange={v => updateSetting("targetScore", v)} min={3} max={30} step={1} format={v => `${v} pt`} />
+                </div>
+              )}
+              <SettingRow emoji="📝" label="Enkel eigen vragen" subtitle="Schakelt de standaardvragen uit. Enkel jouw toegevoegde prompts worden gebruikt." settingKey="customOnly" currentValue={settings.customOnly} />
+              <SettingRow emoji="😈" label="Bewuste imposter" subtitle="De imposter weet tijdens het lezen van de vraag dat hij/zij de imposter is." settingKey="blindImposter" currentValue={settings.blindImposter} invertToggle noBorder />
+            </Card>
+
+            <div style={{ textAlign: "center", marginTop: 20, marginBottom: 0, lineHeight: 1.5 }}>
+              <div style={{ fontSize: 12, fontWeight: 700, color: "#444", letterSpacing: "0.05em" }}>Imposter — The Party Game</div>
+              <div style={{ fontSize: 10, fontWeight: 600, color: "#333", letterSpacing: "0.05em" }}>versie {APP_VERSION} (beta)</div>
             </div>
+
           </div>
+
           <div style={S.footer}>
             {questionError && (
               <div style={{
-                background: "#2a1010",
-                border: `1px solid #6a1a1a`,
-                borderRadius: 20,
-                padding: "14px 18px",
-                marginBottom: 12,
-                display: "flex",
-                alignItems: "center",
-                gap: 12,
+                background: "#2a1010", border: `1px solid #6a1a1a`,
+                borderRadius: 20, padding: "14px 18px", marginBottom: 12,
+                display: "flex", alignItems: "center", gap: 12,
               }}>
                 <span style={{ fontSize: 20 }}>⚠️</span>
-                <div style={{ fontSize: 15, fontWeight: 600, color: "#e07070", lineHeight: 1.4 }}>
-                  {questionError}
-                </div>
+                <div style={{ fontSize: 15, fontWeight: 600, color: "#e07070", lineHeight: 1.4 }}>{questionError}</div>
               </div>
             )}
-            <BigBtn onClick={startGame} disabled={players.length < 3 || !!questionError}>
+            <BigBtn
+              onClick={startGame}
+              disabled={!canStart}
+              style={canStart ? { animation: "startPulse 2.5s ease-in-out infinite" } : {}}
+            >
               {players.length < 3 ? `Nog ${3 - players.length} speler${3 - players.length !== 1 ? "s" : ""} nodig` : "🚀 Spel starten"}
             </BigBtn>
           </div>
@@ -1315,7 +1417,7 @@ const CountdownScreen = ({ countdown }) => {
       const [showInstructions, setShowInstructions] = useState(false);
       const [showSettings, setShowSettings] = useState(false);
       const [settings, setSettings] = useState(() => {
-        const defaults = { timerEnabled: false, timerSeconds: 60, targetEnabled: false, targetScore: 10, customOnly: false, blindImposter: false };
+        const defaults = { timerEnabled: false, timerSeconds: 60, targetEnabled: false, targetScore: 10, customOnly: false, blindImposter: true };
         try {
           const saved = JSON.parse(localStorage.getItem("imposter_settings"));
           return saved ? { ...defaults, ...saved } : defaults;
@@ -1331,7 +1433,7 @@ const CountdownScreen = ({ countdown }) => {
       const notEnoughQuestions = activePool.length < 2;
       const effectiveQuestionError = notEnoughQuestions 
         ? (settings.customOnly 
-            ? "'Enkel eigen vragen' is actief. Voeg minstens 2 vragen toe via 'Prompts beheren' om een spel te starten."
+            ? "'Enkel eigen vragen' is actief. Voeg minstens 2 vragen toe via 'Eigen vragen' om een spel te starten."
             : "Niet genoeg vragen om te starten. Voeg minstens 2 eigen vragen toe.")
         : questionError;
       const countdownRef = useRef(null);
@@ -1383,7 +1485,7 @@ const CountdownScreen = ({ countdown }) => {
         if (currentActivePool.length < 2) {
           setQuestionError(
             settings.customOnly
-              ? "'Enkel eigen vragen' actief. Voeg minstens 2 vragen toe via 'Prompts beheren'."
+              ? "'Enkel eigen vragen' actief. Voeg minstens 2 vragen toe."
               : "Niet genoeg vragen. Voeg minstens 2 eigen vragen toe."
           );
           setPhase(PHASES.SETUP);
@@ -1402,7 +1504,7 @@ const CountdownScreen = ({ countdown }) => {
         setAvailablePrompts(prev => {
           const activePool = settings.customOnly ? customQuestions : promptPool;
           if (activePool.length < 2) {
-            setQuestionError("Niet genoeg vragen om te starten. Voeg minstens 2 eigen vragen toe via \"Prompts beheren\".");
+            setQuestionError("Niet genoeg vragen om te starten. Voeg minstens 2 eigen vragen toe.");
             return prev;
           }
           const pool = prev.filter(q => activePool.includes(q));
@@ -1561,7 +1663,7 @@ const CountdownScreen = ({ countdown }) => {
           )}
           
           {phase === PHASES.SETUP && (
-            <SetupScreen players={players} newPlayer={newPlayer} setNewPlayer={setNewPlayer} addPlayer={addPlayer} removePlayer={removePlayer} startGame={() => startGame()} onOpenPrompts={() => setShowPrompts(true)} onOpenInstructions={() => setShowInstructions(true)} onOpenSettings={() => setShowSettings(true)} questionError={effectiveQuestionError} playerError={playerError} setPlayerError={setPlayerError} settings={settings} />
+            <SetupScreen players={players} newPlayer={newPlayer} setNewPlayer={setNewPlayer} addPlayer={addPlayer} removePlayer={removePlayer} startGame={() => startGame()} onOpenPrompts={() => setShowPrompts(true)} onOpenInstructions={() => setShowInstructions(true)} onOpenSettings={() => setShowSettings(true)} questionError={effectiveQuestionError} playerError={playerError} setPlayerError={setPlayerError} settings={settings} onUpdateSettings={(key, val) => setSettings(prev => ({ ...prev, [key]: val }))} />
           )}
           {phase === PHASES.QUESTION_TURN && (
             <QuestionTurnScreen player={roundPlayerOrder[currentPlayerIdx]} round={round} current={currentPlayerIdx + 1} total={roundPlayerOrder.length} onShow={() => setPhase(PHASES.SHOW_QUESTION)} />
