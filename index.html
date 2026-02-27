@@ -12,7 +12,7 @@
   <link rel="icon" type="image/x-icon" href="./Logo.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Jersey+15&display=swap" rel="stylesheet">
+
   <title>Imposter - The Party Game</title>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
@@ -115,6 +115,16 @@
       .btn-active:active { transform: scale(0.96); filter: brightness(0.9); }
       .input-focus:focus { border-color: ${ACCENT} !important; outline: none; box-shadow: 0 0 0 2px ${ACCENT}44; }
       ::-webkit-scrollbar { width: 0px; background: transparent; }
+      body::before {
+        content: '';
+        position: fixed;
+        inset: 0;
+        pointer-events: none;
+        z-index: 9999;
+        opacity: 0.035;
+        background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+        background-size: 180px 180px;
+      }
       @keyframes fadeIn {
         from { opacity: 0; transform: translateY(8px); }
         to   { opacity: 1; transform: translateY(0); }
@@ -127,6 +137,24 @@
         0%   { transform: scale(0.8); opacity: 0; }
         60%  { transform: scale(1.1); }
         100% { transform: scale(1); opacity: 1; }
+      }
+      @keyframes countdownPop {
+        0%   { transform: scale(1.6); opacity: 0; }
+        55%  { opacity: 1; }
+        100% { transform: scale(1); opacity: 1; }
+      }
+      @keyframes winnerPulse {
+        0%, 100% { text-shadow: 0 0 0px ${GREEN}00; transform: scale(1); }
+        50%       { text-shadow: 0 0 32px ${GREEN}bb; transform: scale(1.05); }
+      }
+      @keyframes confettiFall {
+        0%   { transform: translateY(-10px) rotate(0deg); opacity: 1; }
+        100% { transform: translateY(130px) rotate(720deg); opacity: 0; }
+      }
+      @keyframes successSlideIn {
+        0%   { opacity: 0; transform: translateY(-6px) scale(0.95); }
+        60%  { transform: translateY(2px) scale(1.01); }
+        100% { opacity: 1; transform: translateY(0) scale(1); }
       }
     `;
 
@@ -222,6 +250,7 @@
     const PromptsModal = ({ customQuestions, onAdd, onDelete, onClose }) => {
       const [qText, setQText] = useState("");
       const [qError, setQError] = useState("");
+      const [successMsg, setSuccessMsg] = useState("");
 
       const handleAdd = () => {
         if (qText.trim()) {
@@ -239,6 +268,8 @@
           onAdd(fullQ);
           setQText("");
           setQError("");
+          setSuccessMsg("✓ Vraag toegevoegd!");
+          setTimeout(() => setSuccessMsg(""), 2200);
         }
       };
 
@@ -340,6 +371,15 @@
                   {qError && (
                     <div style={{ display: "flex", alignItems: "center", gap: 8, marginTop: 10, color: "#e07070", fontSize: 14, fontWeight: 600 }}>
                       <span>⚠️</span><span>{qError}</span>
+                    </div>
+                  )}
+                  {successMsg && (
+                    <div style={{
+                      display: "flex", alignItems: "center", gap: 8, marginTop: 10,
+                      color: GREEN, fontSize: 14, fontWeight: 700,
+                      animation: "successSlideIn 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards",
+                    }}>
+                      <span>{successMsg}</span>
                     </div>
                   )}
                 </div>
@@ -552,7 +592,7 @@
       </div>
     );
 
-    const APP_VERSION = "2.0.0";
+    const APP_VERSION = "2.0.1";
     const LANGUAGES = [
       { code: "nl", label: "Nederlands"},
       { code: "en", label: "English"},
@@ -899,6 +939,11 @@
                   <span>⚠️</span><span>{playerError}</span>
                 </div>
               )}
+              {!playerError && players.length === 3 && (
+                <div style={{ display: "flex", alignItems: "center", gap: 8, marginTop: 10, color: ACCENT, fontSize: 13, fontWeight: 600, opacity: 0.85 }}>
+                  <span>💡</span><span>Tip: het spel is leuker met 4+ spelers!</span>
+                </div>
+              )}
             </Card>
 
             {/* ── Spelinstellingen ── */}
@@ -1083,15 +1128,19 @@ const CountdownScreen = ({ countdown }) => {
         <div style={{ fontSize: 18, color: MUTED, fontWeight: 800, letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: 40 }}>
           {countdown > 0 ? "Klaar om te tonen?" : "Toon je naam!"}
         </div>
-        <div style={{
-          fontSize: countdown === 0 ? 140 : 180,
-          fontWeight: 800, lineHeight: 1,
-          color: countdown === 0 ? ACCENT : TEXT,
-          letterSpacing: "-0.04em",
-          textShadow: countdown === 0 ? `0 0 60px ${ACCENT}88` : "none",
-          transition: "all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275)",
-          transform: countdown === 0 ? "scale(1.2)" : "scale(1)",
-        }}>
+        <div
+          key={countdown}
+          style={{
+            fontSize: countdown === 0 ? 130 : 190,
+            fontWeight: 800,
+            lineHeight: 1,
+            color: countdown === 0 ? ACCENT : TEXT,
+            letterSpacing: "-0.04em",
+            textShadow: countdown === 0 ? `0 0 80px ${ACCENT}99` : "none",
+            animation: "countdownPop 0.45s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards",
+            display: "inline-block",
+          }}
+        >
           {countdown === 0 ? "📢" : countdown}
         </div>
       </div>
@@ -1256,7 +1305,7 @@ const CountdownScreen = ({ countdown }) => {
             De imposter was <strong style={{ color: TEXT, fontWeight: 800 }}>{imposterName}</strong>
           </div>
 
-          <Card style={{ marginBottom: 40, padding: "28px 24px" }}>
+          <Card style={{ padding: "28px 24px" }}>
             <Tag>Gewone vraag</Tag>
             <div style={{ fontSize: 18, lineHeight: 1.5, marginBottom: 20, fontWeight: 600 }}>{normalQ}</div>
             <Divider />
@@ -1270,6 +1319,38 @@ const CountdownScreen = ({ countdown }) => {
         </div>
       </div>
     );
+
+    const ConfettiBlast = () => {
+      const pieces = React.useMemo(() => {
+        const colors = [ACCENT, GREEN, "#e05252", "#52b8e0", "#d452e0", "#e08a52"];
+        return Array.from({ length: 28 }, (_, i) => ({
+          id: i,
+          color: colors[i % colors.length],
+          left: `${Math.random() * 100}%`,
+          delay: `${Math.random() * 0.8}s`,
+          duration: `${1.2 + Math.random() * 0.8}s`,
+          size: `${6 + Math.floor(Math.random() * 7)}px`,
+          shape: Math.random() > 0.5 ? "50%" : "2px",
+        }));
+      }, []);
+
+      return (
+        <div style={{ position: "absolute", top: 0, left: 0, width: "100%", height: "100%", overflow: "hidden", pointerEvents: "none", zIndex: 10 }}>
+          {pieces.map(p => (
+            <div key={p.id} style={{
+              position: "absolute",
+              top: "-12px",
+              left: p.left,
+              width: p.size,
+              height: p.size,
+              background: p.color,
+              borderRadius: p.shape,
+              animation: `confettiFall ${p.duration} ${p.delay} ease-in forwards`,
+            }} />
+          ))}
+        </div>
+      );
+    };
 
     const ScoreboardScreen = ({ players, scores, round, onPlayAgain, onNewGame, onReset, targetEnabled, targetScore }) => {
       const sorted = [...players].sort((a, b) => (scores[b] || 0) - (scores[a] || 0));
@@ -1290,9 +1371,19 @@ const CountdownScreen = ({ countdown }) => {
             </div>
 
             {winner && (
-              <div style={{ textAlign: "center", marginBottom: 20 }}>
-                <div style={{ fontSize: 40, marginBottom: 8 }}>🏆</div>
-                <div style={{ fontSize: 22, fontWeight: 800, color: GREEN, marginBottom: 4 }}>{winner} is de winnaar!</div>
+              <div style={{ textAlign: "center", marginBottom: 24, position: "relative", overflow: "visible" }}>
+                <ConfettiBlast />
+                <div style={{ fontSize: 52, marginBottom: 10 }}>🏆</div>
+                <div style={{
+                  fontSize: 26, fontWeight: 800, color: GREEN, marginBottom: 4,
+                  animation: "winnerPulse 1.8s ease-in-out infinite",
+                  display: "inline-block",
+                }}>
+                  {winner} wint het spel!
+                </div>
+                <div style={{ fontSize: 14, color: MUTED, fontWeight: 600, marginTop: 6 }}>
+                  🎉 Gefeliciteerd!
+                </div>
               </div>
             )}
 
@@ -1302,7 +1393,7 @@ const CountdownScreen = ({ countdown }) => {
               </div>
             )}
 
-            <Card style={{ marginBottom: 40, padding: "16px 24px" }}>
+            <Card style={{ padding: "16px 24px" }}>
               {sorted.map((name, i) => {
                 const score = scores[name] || 0;
                 const isWinner = name === winner;
@@ -1374,6 +1465,7 @@ const CountdownScreen = ({ countdown }) => {
       const [showPrompts, setShowPrompts] = useState(false);
       const [showInstructions, setShowInstructions] = useState(false);
       const [showSettings, setShowSettings] = useState(false);
+      const [showStopConfirm, setShowStopConfirm] = useState(false);
       const [settings, setSettings] = useState(() => {
         const defaults = { timerEnabled: false, timerSeconds: 60, targetEnabled: false, targetScore: 10, customOnly: false, blindImposter: true };
         try {
@@ -1579,7 +1671,7 @@ const CountdownScreen = ({ countdown }) => {
           {isInGame && (
             <button
               className="btn-active"
-              onClick={stopGame}
+              onClick={() => setShowStopConfirm(true)}
               style={{
                 position: "fixed",
                 top: 24,
@@ -1600,6 +1692,40 @@ const CountdownScreen = ({ countdown }) => {
                 zIndex: 50,
               }}
             >×</button>
+          )}
+          {showStopConfirm && (
+            <div style={{
+              position: "fixed", inset: 0, zIndex: 200,
+              background: "rgba(17,17,17,0.85)",
+              backdropFilter: "blur(16px)", WebkitBackdropFilter: "blur(16px)",
+              display: "flex", alignItems: "center", justifyContent: "center",
+              padding: "24px",
+              fontFamily: "'Outfit', sans-serif",
+              animation: "fadeIn 0.15s ease-in-out",
+            }}>
+              <style>{css}</style>
+              <div style={{
+                background: CARD, border: `1px solid ${BORDER}`,
+                borderRadius: 24, padding: "32px 28px",
+                maxWidth: 360, width: "100%", textAlign: "center",
+              }}>
+                <div style={{ fontSize: 48, marginBottom: 16 }}>🚪</div>
+                <div style={{ fontSize: 22, fontWeight: 800, color: TEXT, marginBottom: 10, letterSpacing: "-0.02em" }}>
+                  Spel verlaten?
+                </div>
+                <div style={{ fontSize: 16, color: MUTED, fontWeight: 500, lineHeight: 1.55, marginBottom: 28 }}>
+                  De huidige ronde gaat verloren en de scores worden gereset.
+                </div>
+                <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+                  <BigBtn bg={RED} color="#fff" onClick={() => { setShowStopConfirm(false); stopGame(); }}>
+                    Ja, stoppen
+                  </BigBtn>
+                  <GhostBtn onClick={() => setShowStopConfirm(false)}>
+                    Annuleren
+                  </GhostBtn>
+                </div>
+              </div>
+            </div>
           )}
           {showInstructions && (
             <InstructionsModal onClose={() => setShowInstructions(false)} />
