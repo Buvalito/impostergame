@@ -82,6 +82,12 @@
       "Wie zou het meest waarschijnlijk plastische chirurgie laten doen?",
       "Wie zou het meest waarschijnlijk ontslag nemen zonder al een nieuwe job te hebben?",
       "Wie zou het meest waarschijnlijk toestemming moeten vragen aan z'n partner om te gamen?",
+      "Wie zou het meest waarschijnlijk een serie bingen in 1 dag?",
+      "Wie zou het meest waarschijnlijk een film starten en weer stoppen na een kwartier?",
+      "Wie zou het meest waarschijnlijk blaffen tijdens de seks?",
+      "Wie zou het meest waarschijnlijk van de aardbol verdwijnen na het winnen van de Lotto?",
+      "Wie zou het meest waarschijnlijk zijn of haar partner bedriegen?",
+      "Wie zou het meest waarschijnlijk een bak bier drinken in een dag?",
       "Wie zou het meest waarschijnlijk een Excel-sheet maken voor iets totaal onnodigs?"
     ];
 
@@ -96,6 +102,8 @@
       RESULT:          "result",
       SCOREBOARD:      "scoreboard",
     };
+
+    const MAX_PLAYERS = 12; // ← Verander dit getal om het maximum aantal spelers aan te passen
 
     const DARK   = "#111111";
     const CARD   = "#1c1c1c";
@@ -877,7 +885,7 @@
 
             {/* ── Spelers ── */}
             <Card style={{ marginBottom: 14 }}>
-              <Tag>Spelers ({players.length}/8)</Tag>
+              <Tag>Spelers ({players.length}/{MAX_PLAYERS})</Tag>
               {players.length > 0 && (
                 <div style={{ display: "flex", flexWrap: "wrap", gap: 8, marginBottom: 16 }}>
                   {players.map((p, i) => (
@@ -902,34 +910,34 @@
                     setNewPlayer(formattedVal);
                     if (playerError) setPlayerError("");
                   }}
-                  onKeyDown={e => e.key === "Enter" && newPlayer.trim() !== "" && players.length < 8 && handleAddPlayer()}
-                  placeholder={players.length >= 8 ? "Max. spelers bereikt" : "Speler toevoegen…"}
-                  disabled={players.length >= 8}
+                  onKeyDown={e => e.key === "Enter" && newPlayer.trim() !== "" && players.length < MAX_PLAYERS && handleAddPlayer()}
+                  placeholder={players.length >= MAX_PLAYERS ? "Max. spelers bereikt" : "Speler toevoegen…"}
+                  disabled={players.length >= MAX_PLAYERS}
                   style={{
                     flex: 1, 
-                    background: players.length >= 8 ? "#1a1a1a" : "#222", 
+                    background: players.length >= MAX_PLAYERS ? "#1a1a1a" : "#222", 
                     border: `2px solid ${BORDER}`, 
                     borderRadius: 12,
                     padding: "13px", 
-                    color: players.length >= 8 ? "#444" : TEXT, 
+                    color: players.length >= MAX_PLAYERS ? "#444" : TEXT, 
                     fontSize: 17, 
                     minWidth: 0, 
                     fontWeight: 600, 
                     fontFamily: "'Outfit', sans-serif",
-                    cursor: players.length >= 8 ? "not-allowed" : "text",
+                    cursor: players.length >= MAX_PLAYERS ? "not-allowed" : "text",
                   }}
                 />
                 <button 
-                  className={newPlayer.trim() === "" || players.length >= 8 ? "" : "btn-active"} 
+                  className={newPlayer.trim() === "" || players.length >= MAX_PLAYERS ? "" : "btn-active"} 
                   onClick={handleAddPlayer} 
-                  disabled={newPlayer.trim() === "" || players.length >= 8}
+                  disabled={newPlayer.trim() === "" || players.length >= MAX_PLAYERS}
                   style={{
                     background: ACCENT, color: "#111", border: "none", 
                     borderRadius: 12, padding: "0 18px", fontSize: 26, fontWeight: 700, 
-                    cursor: newPlayer.trim() === "" || players.length >= 8 ? "not-allowed" : "pointer", 
+                    cursor: newPlayer.trim() === "" || players.length >= MAX_PLAYERS ? "not-allowed" : "pointer", 
                     flexShrink: 0,
-                    opacity: newPlayer.trim() === "" || players.length >= 8 ? 0.3 : 1,
-                    filter: newPlayer.trim() === "" || players.length >= 8 ? "grayscale(0.5)" : "none",
+                    opacity: newPlayer.trim() === "" || players.length >= MAX_PLAYERS ? 0.3 : 1,
+                    filter: newPlayer.trim() === "" || players.length >= MAX_PLAYERS ? "grayscale(0.5)" : "none",
                     transition: "all 0.3s ease"
                   }}
                 >+</button>
@@ -1594,7 +1602,7 @@ const CountdownScreen = ({ countdown }) => {
           setPlayerError(`"${name}" is al toegevoegd.`);
           return;
         }
-        if (players.length < 8) {
+        if (players.length < MAX_PLAYERS) {
           setPlayers(prev => [...prev, name]);
           setScores(prev => ({ ...prev, [name]: prev[name] || 0 }));
           setNewPlayer("");
