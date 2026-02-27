@@ -222,15 +222,6 @@
     const PromptsModal = ({ customQuestions, onAdd, onDelete, onClose }) => {
       const [qText, setQText] = useState("");
       const [qError, setQError] = useState("");
-      const [hidden, setHidden] = useState(() => {
-        try { return localStorage.getItem("imposter_prompts_hidden") === "true"; } catch { return false; }
-      });
-
-      const toggleHidden = () => setHidden(h => {
-        const next = !h;
-        try { localStorage.setItem("imposter_prompts_hidden", String(next)); } catch {}
-        return next;
-      });
 
       const handleAdd = () => {
         if (qText.trim()) {
@@ -354,33 +345,9 @@
                 </div>
               </div>
 
-              {/* ── Sectieheader met verberg-toggle ── */}
-              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 10, gap: 8 }}>
-                <span style={{ fontSize: 12, fontWeight: 800, letterSpacing: "0.12em", textTransform: "uppercase", color: MUTED }}>
-                  Toegevoegde vragen {customQuestions.length > 0 && `(${customQuestions.length})`}
-                </span>
-                {customQuestions.length > 0 && (
-                  <button
-                    className="btn-active"
-                    onClick={() => toggleHidden()}
-                    style={{
-                      background: `${ACCENT}15`,
-                      border: `1px solid ${ACCENT}30`,
-                      borderRadius: 100,
-                      padding: "3px 10px",
-                      fontSize: 14,
-                      fontWeight: 700,
-                      color: `${ACCENT}`,
-                      cursor: "pointer",
-                      fontFamily: "'Outfit', sans-serif",
-                      flexShrink: 0,
-                      whiteSpace: "nowrap",
-                    }}
-                  >
-                    {hidden ? "Tonen" : "Verbergen"}
-                  </button>
-                )}
-              </div>
+              <span style={{ fontSize: 13, fontWeight: 800, letterSpacing: "0.12em", textTransform: "uppercase", color: MUTED, display: "block", marginBottom: 10 }}>
+                Toegevoegde vragen {customQuestions.length > 0 && `(${customQuestions.length})`}
+              </span>
             </div>
 
             {/* ── Scrollbare lijst ── */}
@@ -390,17 +357,8 @@
               ) : (
                 customQuestions.slice().reverse().map((q, idx) => (
                   <div key={idx} style={{ padding: "16px 0", borderBottom: `1px solid ${BORDER}`, display: "flex", justifyContent: "space-between", alignItems: "center", gap: 12 }}>
-                    <div style={{ flex: 1, lineHeight: 1.4 }}>
-                      {hidden ? (
-                        <div style={{ display: "flex", flexDirection: "column", gap: 7 }}>
-                          <div style={{ height: 11, borderRadius: 6, background: "#2e2e2e", width: `${50 + (idx * 37 + 17) % 38}%` }} />
-                          <div style={{ height: 11, borderRadius: 6, background: "#272727", width: `${28 + (idx * 53 + 7) % 36}%` }} />
-                        </div>
-                      ) : (
-                        <div style={{ color: TEXT, fontSize: 16, fontWeight: 500 }}>{q}</div>
-                      )}
-                    </div>
-                    <button onClick={() => !hidden && onDelete(q)} className={hidden ? "" : "btn-active"} style={{ background: hidden ? "#2a2a2a" : RED, color: "#fff", border: "none", borderRadius: "50%", width: 32, height: 32, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 18, fontWeight: 800, cursor: hidden ? "default" : "pointer", flexShrink: 0, opacity: hidden ? 0.2 : 1, transition: "all 0.2s ease" }}>
+                    <div style={{ color: TEXT, fontSize: 16, fontWeight: 500, lineHeight: 1.4, flex: 1 }}>{q}</div>
+                    <button onClick={() => onDelete(q)} className="btn-active" style={{ background: RED, color: "#fff", border: "none", borderRadius: "50%", width: 32, height: 32, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 18, fontWeight: 800, cursor: "pointer", flexShrink: 0 }}>
                       ×
                     </button>
                   </div>
@@ -824,24 +782,24 @@
                 onClick={onOpenInstructions}
                 style={{
                   background: `${ACCENT}15`,
-                  border: `1px solid ${ACCENT}30`,
+                  border: `1px solid ${ACCENT}35`,
                   borderRadius: 16,
-                  padding: "14px 12px",
+                  padding: "8px 12px 10px 12px",
                   display: "flex", flexDirection: "column", alignItems: "center", gap: 6,
                   cursor: "pointer", fontFamily: "'Outfit', sans-serif",
                 }}
               >
                 <span style={{ fontSize: 20 }}>📖</span>
-                <span style={{ fontSize: 12, fontWeight: 700, color: TEXT, lineHeight: 1.2, textAlign: "center" }}>Handleiding</span>
+                <span style={{ fontSize: 11, fontWeight: 700, color: TEXT, lineHeight: 1.2, textAlign: "center" }}>Spelregels</span>
               </button>
               <button
                 className="btn-active"
                 onClick={onOpenPrompts}
                 style={{
                   background: `${ACCENT}15`,
-                  border: `1px solid ${ACCENT}30`,
+                  border: `1px solid ${ACCENT}35`,
                   borderRadius: 16,
-                  padding: "14px 12px",
+                  padding: "8px 12px 10px 12px",
                   display: "flex", flexDirection: "column", alignItems: "center", gap: 6,
                   cursor: "pointer", fontFamily: "'Outfit', sans-serif",
                   position: "relative",
@@ -857,23 +815,23 @@
                   }}>Actief</span>
                 )}
                 <span style={{ fontSize: 20 }}>✏️</span>
-                <span style={{ fontSize: 12, fontWeight: 700, color: TEXT, lineHeight: 1.2, textAlign: "center" }}>Eigen vragen</span>
+                <span style={{ fontSize: 11, fontWeight: 700, color: TEXT, lineHeight: 1.2, textAlign: "center" }}>Eigen vragen</span>
               </button>
               <button
                 onClick={undefined}
                 style={{
                   background: `${ACCENT}15`,
-                  border: `1px solid ${ACCENT}30`,
+                  border: `1px solid ${ACCENT}35`,
                   borderRadius: 16,
-                  padding: "14px 12px",
+                  padding: "8px 12px 10px 12px",
                   display: "flex", flexDirection: "column", alignItems: "center", gap: 6,
                   cursor: "not-allowed", fontFamily: "'Outfit', sans-serif",
-                  opacity: 0.5,
+                  opacity: 0.3,
                   pointerEvents: "none",
                 }}
               >
                 <span style={{ fontSize: 20 }}>⚙️</span>
-                <span style={{ fontSize: 12, fontWeight: 700, color: TEXT, lineHeight: 1.2, textAlign: "center" }}>Instellingen</span>
+                <span style={{ fontSize: 11, fontWeight: 700, color: TEXT, lineHeight: 1.2, textAlign: "center" }}>Instellingen</span>
               </button>
             </div>
 
@@ -947,23 +905,23 @@
             <Card style={{ marginBottom: 0 }}>
               <Tag>Spelopties</Tag>
 
-              <SettingRow emoji="⏱️" label="Discussietimer" subtitle="Automatisch aftellen tijdens het overleggen." settingKey="timerEnabled" currentValue={settings.timerEnabled} />
+              <SettingRow emoji="⏱️" label="Discussietimer" subtitle="Start automatisch een aftellende timer tijdens het overleggen." settingKey="timerEnabled" currentValue={settings.timerEnabled} />
               {settings.timerEnabled && (
-                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "10px 0 12px 36px", borderBottom: `1px solid ${BORDER}` }}>
+                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "10px 0 12px 40px", borderBottom: `1px solid ${BORDER}` }}>
                   <span style={{ fontSize: 13, fontWeight: 600, color: MUTED }}>Tijdsduur</span>
                   <Stepper value={settings.timerSeconds} onChange={v => updateSetting("timerSeconds", v)} min={15} max={180} step={15} format={v => `${v}s`} />
                 </div>
               )}
 
-              <SettingRow emoji="🏆" label="Eindscore" subtitle="Het spel eindigt als iemand dit aantal punten haalt." settingKey="targetEnabled" currentValue={settings.targetEnabled} />
+              <SettingRow emoji="🏆" label="Scorelimiet" subtitle="Het spel eindigt als iemand dit aantal punten haalt." settingKey="targetEnabled" currentValue={settings.targetEnabled} />
               {settings.targetEnabled && (
-                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "10px 0 12px 36px", borderBottom: `1px solid ${BORDER}` }}>
-                  <span style={{ fontSize: 13, fontWeight: 600, color: MUTED }}>Punten om te winnen</span>
+                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "10px 0 12px 40px", borderBottom: `1px solid ${BORDER}` }}>
+                  <span style={{ fontSize: 13, fontWeight: 600, color: MUTED }}>Punten</span>
                   <Stepper value={settings.targetScore} onChange={v => updateSetting("targetScore", v)} min={3} max={30} step={1} format={v => `${v} pt`} />
                 </div>
               )}
-              <SettingRow emoji="📝" label="Enkel eigen vragen" subtitle="Schakelt de standaardvragen uit. Enkel jouw toegevoegde prompts worden gebruikt." settingKey="customOnly" currentValue={settings.customOnly} />
-              <SettingRow emoji="😈" label="Bewuste imposter" subtitle="De imposter weet tijdens het lezen van de vraag dat hij/zij de imposter is." settingKey="blindImposter" currentValue={settings.blindImposter} invertToggle noBorder />
+              <SettingRow emoji="📝" label="Enkel eigen vragen" subtitle="Schakel de standaardvragen uit en enkel met jouw toegevoegde prompts." settingKey="customOnly" currentValue={settings.customOnly} />
+              <SettingRow emoji="😈" label="Bewuste imposter" subtitle="De imposter weet meteen tijdens het lezen van de vraag dat hij/zij de imposter is." settingKey="blindImposter" currentValue={settings.blindImposter} invertToggle noBorder />
             </Card>
 
             <div style={{ textAlign: "center", marginTop: 20, marginBottom: 0, lineHeight: 1.5 }}>
