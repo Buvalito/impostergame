@@ -356,7 +356,7 @@
 
               {/* ── Sectieheader met verberg-toggle ── */}
               <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 10, gap: 8 }}>
-                <span style={{ fontSize: 11, fontWeight: 800, letterSpacing: "0.12em", textTransform: "uppercase", color: MUTED }}>
+                <span style={{ fontSize: 12, fontWeight: 800, letterSpacing: "0.12em", textTransform: "uppercase", color: MUTED }}>
                   Toegevoegde vragen {customQuestions.length > 0 && `(${customQuestions.length})`}
                 </span>
                 {customQuestions.length > 0 && (
@@ -368,7 +368,7 @@
                       border: `1px solid ${ACCENT}30`,
                       borderRadius: 100,
                       padding: "3px 10px",
-                      fontSize: 16,
+                      fontSize: 14,
                       fontWeight: 700,
                       color: `${ACCENT}`,
                       cursor: "pointer",
@@ -377,7 +377,7 @@
                       whiteSpace: "nowrap",
                     }}
                   >
-                    {hidden ? "👁️" : "🙈"}
+                    {hidden ? "Tonen" : "Verbergen"}
                   </button>
                 )}
               </div>
