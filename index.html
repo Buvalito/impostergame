@@ -753,6 +753,51 @@
 
     // ─── Screens ───────────────────────────────────────────────────────────────
 
+    const SettingRow = ({ emoji, label, subtitle, settingKey, currentValue, noBorder, invertToggle, onToggle }) => {
+      const isOn = invertToggle ? !currentValue : currentValue;
+      const [showSubtitle, setShowSubtitle] = useState(isOn);
+      const [animKey, setAnimKey] = useState(0);
+      const prevIsOnRef = useRef(isOn);
+
+      useEffect(() => {
+        if (isOn && !prevIsOnRef.current) {
+          setAnimKey(k => k + 1);
+          setShowSubtitle(true);
+        } else if (!isOn) {
+          setShowSubtitle(false);
+        }
+        prevIsOnRef.current = isOn;
+      }, [isOn]);
+
+      return (
+        <div style={{
+          padding: "14px 0",
+          borderBottom: noBorder ? "none" : `1px solid ${BORDER}`,
+        }}>
+          <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 12 }}>
+            <div style={{ display: "flex", alignItems: "flex-start", gap: 14, flex: 1 }}>
+              <span style={{ fontSize: 22, flexShrink: 0, lineHeight: 1, marginTop: 2 }}>{emoji}</span>
+              <div style={{ flex: 1 }}>
+                <div style={{ fontSize: 16, fontWeight: 700, color: TEXT, lineHeight: 1.4 }}>{label}</div>
+                {showSubtitle && subtitle && (
+                  <div key={animKey} style={{
+                    fontSize: 12, color: MUTED, fontWeight: 500, lineHeight: 1.4,
+                    paddingTop: 5, paddingRight: 5,
+                    animation: "fadeIn 0.2s ease",
+                  }}>
+                    {subtitle}
+                  </div>
+                )}
+              </div>
+            </div>
+            <div style={{ marginTop: 2, flexShrink: 0 }}>
+              <Toggle enabled={isOn} onToggle={onToggle} />
+            </div>
+          </div>
+        </div>
+      );
+    };
+
     // SetupScreen heeft een eigen inputRef voor autofocus na toevoegen
     const SetupScreen = ({ players, newPlayer, setNewPlayer, addPlayer, removePlayer, startGame, onOpenPrompts, onOpenInstructions, onOpenSettings, questionError, playerError, setPlayerError, settings = {}, onUpdateSettings }) => {
       const inputRef = useRef(null);
@@ -767,25 +812,6 @@
       };
 
       const canStart = players.length >= 3 && !questionError;
-
-      const SettingRow = ({ emoji, label, subtitle, settingKey, currentValue, noBorder, invertToggle }) => (
-        <div style={{ 
-          display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 12,
-          padding: "14px 0",
-          borderBottom: noBorder ? "none" : `1px solid ${BORDER}`,
-        }}>
-          <div style={{ display: "flex", alignItems: "flex-start", gap: 14, flex: 1 }}>
-            <span style={{ fontSize: 22, flexShrink: 0, lineHeight: 1, marginTop: 1 }}>{emoji}</span>
-            <div>
-              <div style={{ fontSize: 15, fontWeight: 700, color: TEXT, marginBottom: subtitle ? 5 : 0 }}>{label}</div>
-              {subtitle && <div style={{ fontSize: 12, color: MUTED, fontWeight: 500, lineHeight: 1.4 }}>{subtitle}</div>}
-            </div>
-          </div>
-          <div style={{ marginTop: 2 }}>
-            <Toggle enabled={invertToggle ? !currentValue : currentValue} onToggle={() => updateSetting(settingKey, !currentValue)} />
-          </div>
-        </div>
-      );
 
       return (
         <div style={S.page}>
@@ -958,7 +984,7 @@
             <Card style={{ marginBottom: 0 }}>
               <Tag>Spelopties</Tag>
               
-              <SettingRow emoji="🏆" label="Scorelimiet" subtitle="Het spel eindigt als iemand dit aantal punten haalt." settingKey="targetEnabled" currentValue={settings.targetEnabled} />
+              <SettingRow emoji="🏆" label="Scorelimiet" subtitle="Het spel eindigt als iemand dit aantal punten haalt." currentValue={settings.targetEnabled} onToggle={() => updateSetting("targetEnabled", !settings.targetEnabled)} />
               {settings.targetEnabled && (
                 <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "10px 0 12px 40px", borderBottom: `1px solid ${BORDER}` }}>
                   <span style={{ fontSize: 13, fontWeight: 600, color: MUTED }}>Punten</span>
@@ -966,7 +992,7 @@
                 </div>
               )}
 
-              <SettingRow emoji="⏱️" label="Discussietimer" subtitle="Zet de timer aan en bepaal hoe lang er overlegd mag worden." settingKey="timerEnabled" currentValue={settings.timerEnabled} />
+              <SettingRow emoji="⏱️" label="Discussietimer" subtitle="Zet de timer aan en bepaal hoe lang er overlegd mag worden." currentValue={settings.timerEnabled} onToggle={() => updateSetting("timerEnabled", !settings.timerEnabled)} />
               {settings.timerEnabled && (
                 <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "10px 0 12px 40px", borderBottom: `1px solid ${BORDER}` }}>
                   <span style={{ fontSize: 13, fontWeight: 600, color: MUTED }}>Tijdsduur</span>
@@ -974,13 +1000,13 @@
                 </div>
               )}
 
-              <SettingRow emoji="📝" label="Enkel eigen vragen" subtitle="Schakel de standaardvragen uit en speel enkel met jouw zelf toegevoegde prompts." settingKey="customOnly" currentValue={settings.customOnly} />
+              <SettingRow emoji="📝" label="Enkel eigen vragen" subtitle="Schakel de standaardvragen uit en speel enkel met jouw zelf toegevoegde prompts." currentValue={settings.customOnly} onToggle={() => updateSetting("customOnly", !settings.customOnly)} />
               
-              <SettingRow emoji="😈" label="Bewuste imposter" subtitle="De imposter weet meteen tijdens het lezen van de vraag dat hij/zij de imposter is." settingKey="blindImposter" currentValue={settings.blindImposter} invertToggle noBorder />
+              <SettingRow emoji="😈" label="Bewuste imposter" subtitle="De imposter weet meteen tijdens het lezen van de vraag dat hij/zij de imposter is." currentValue={settings.blindImposter} invertToggle noBorder onToggle={() => updateSetting("blindImposter", !settings.blindImposter)} />
             </Card>
 
             <div style={{ textAlign: "center", marginTop: 20, marginBottom: 0, lineHeight: 1.5 }}>
-              <div style={{ fontSize: 12, fontWeight: 700, color: "#444", letterSpacing: "0.05em" }}>Imposter — The Party Game</div>
+              <div style={{ fontSize: 12, fontWeight: 700, color: "#444", letterSpacing: "0.01em" }}>Imposter — The Party Game</div>
               <div style={{ fontSize: 10, fontWeight: 600, color: "#333", letterSpacing: "0.05em" }}>versie {APP_VERSION} (beta)</div>
             </div>
 
@@ -1166,7 +1192,7 @@ const CountdownScreen = ({ countdown }) => {
             <div style={{ fontSize: 80, marginBottom: 30 }}>👀</div>
             <div style={{ fontSize: 36, fontWeight: 800, marginBottom: 20, letterSpacing: "-0.02em" }}>Namen tonen!</div>
             <div style={{ fontSize: 20, color: MUTED, lineHeight: 1.6, fontWeight: 500 }}>
-              Heeft iedereen de namen gezien?<br />Druk dan op de knop om verder te gaan en de vraag te onthullen.
+              Heeft iedereen de namen gezien?<br />Druk op de knop de vraag te onthullen.
             </div>
           </div>
         </div>
@@ -1392,7 +1418,7 @@ const CountdownScreen = ({ countdown }) => {
                   {winner} wint het spel!
                 </div>
                 <div style={{ fontSize: 14, color: MUTED, fontWeight: 600, marginTop: 6 }}>
-                  🎉 Gefeliciteerd!
+                  🎉 Goed gespeeld!
                 </div>
               </div>
             )}
