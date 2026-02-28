@@ -105,6 +105,12 @@
 
     const MAX_PLAYERS = 12; // ← Verander dit getal om het maximum aantal spelers aan te passen
 
+    const PLAYER_COLORS = [
+      "#e8c547","#52c98a","#e05252","#52b8e0",
+      "#d452e0","#e08a52","#52e0c9","#9a7de8",
+      "#e87d9a","#8ae06b","#f0a04b","#7db8e8",
+    ];
+
     const DARK   = "#111111";
     const CARD   = "#1c1c1c";
     const BORDER = "#2a2a2a";
@@ -218,11 +224,12 @@
         color: disabled ? "#555" : color,
         border: "none",
         borderRadius: 20,
-        fontSize: 20,
+        fontSize: "clamp(18px, 5.4vw, 20px)",
         fontWeight: 800,
         fontFamily: "'Outfit', sans-serif",
         cursor: disabled ? "not-allowed" : "pointer",
         letterSpacing: "-0.01em",
+        whiteSpace: "nowrap",
         boxShadow: disabled ? "none" : `0 8px 24px ${bg}25`,
         opacity: disabled ? 0.7 : 1,
         ...style
@@ -237,10 +244,11 @@
         color: MUTED,
         border: `2px solid ${BORDER}`,
         borderRadius: 20,
-        fontSize: 18,
+        fontSize: "clamp(16px, 4.8vw, 18px)",
         fontWeight: 700,
         fontFamily: "'Outfit', sans-serif",
         cursor: "pointer",
+        whiteSpace: "nowrap",
         ...style
       }}>{children}</button>
     );
@@ -255,6 +263,8 @@
 
     // ─── Custom Prompts Modal ──────────────────────────────────────────────────
     
+    const MAX_QUESTION_LENGTH = 90;
+
     const PromptsModal = ({ customQuestions, onAdd, onDelete, onClose }) => {
       const [qText, setQText] = useState("");
       const [qError, setQError] = useState("");
@@ -265,6 +275,11 @@
           let suffix = qText.trim();
           if (!suffix.endsWith('?')) suffix += '?';
           const fullQ = `Wie zou het meest waarschijnlijk ${suffix}`;
+          
+          if (fullQ.length > MAX_QUESTION_LENGTH) {
+            setQError(`Te lang! Max. ${MAX_QUESTION_LENGTH} tekens.`);
+            return;
+          }
           
           const allQuestions = [...customQuestions, ...INITIAL_PROMPTS];
           const isDuplicate = allQuestions.some(q => q.toLowerCase() === fullQ.toLowerCase());
@@ -337,7 +352,8 @@
                     <input 
                       className="input-focus" 
                       placeholder="...dit spel winnen?" 
-                      value={qText} 
+                      value={qText}
+                      maxLength={MAX_QUESTION_LENGTH}
                       onChange={e => { 
                         const val = e.target.value;
                         const formatted = val.length > 0 ? val.charAt(0).toLowerCase() + val.slice(1) : val;
@@ -600,7 +616,7 @@
       </div>
     );
 
-    const APP_VERSION = "2.0.1";
+    const APP_VERSION = "2.0.2";
     const LANGUAGES = [
       { code: "nl", label: "Nederlands"},
       { code: "en", label: "English"},
@@ -799,7 +815,7 @@
     };
 
     // SetupScreen heeft een eigen inputRef voor autofocus na toevoegen
-    const SetupScreen = ({ players, newPlayer, setNewPlayer, addPlayer, removePlayer, startGame, onOpenPrompts, onOpenInstructions, onOpenSettings, questionError, playerError, setPlayerError, settings = {}, onUpdateSettings }) => {
+    const SetupScreen = ({ players, newPlayer, setNewPlayer, addPlayer, removePlayer, startGame, onOpenPrompts, onOpenInstructions, onOpenSettings, questionError, playerError, setPlayerError, settings = {}, onUpdateSettings, playerColors = {} }) => {
       const inputRef = useRef(null);
 
       const handleAddPlayer = () => {
@@ -864,7 +880,7 @@
                 }}
               >
                 <span style={{ fontSize: 20 }}>📖</span>
-                <span style={{ fontSize: 11, fontWeight: 700, color: TEXT, lineHeight: 1.2, textAlign: "center" }}>Spelregels</span>
+                <span style={{ fontSize: 11, fontWeight: 700, color: TEXT, lineHeight: 1.2, textAlign: "center", whiteSpace: "nowrap" }}>Spelregels</span>
               </button>
               <button
                 className="btn-active"
@@ -889,7 +905,7 @@
                   }}>Actief</span>
                 )}
                 <span style={{ fontSize: 20 }}>✏️</span>
-                <span style={{ fontSize: 11, fontWeight: 700, color: TEXT, lineHeight: 1.2, textAlign: "center" }}>Eigen vragen</span>
+                <span style={{ fontSize: 11, fontWeight: 700, color: TEXT, lineHeight: 1.2, textAlign: "center", whiteSpace: "nowrap" }}>Eigen vragen</span>
               </button>
               <button
                 onClick={undefined}
@@ -905,7 +921,7 @@
                 }}
               >
                 <span style={{ fontSize: 20 }}>⚙️</span>
-                <span style={{ fontSize: 11, fontWeight: 700, color: TEXT, lineHeight: 1.2, textAlign: "center" }}>Instellingen</span>
+                <span style={{ fontSize: 11, fontWeight: 700, color: TEXT, lineHeight: 1.2, textAlign: "center", whiteSpace: "nowrap" }}>Instellingen</span>
               </button>
             </div>
 
@@ -914,15 +930,26 @@
               <Tag>Spelers ({players.length}/{MAX_PLAYERS})</Tag>
               {players.length > 0 && (
                 <div style={{ display: "flex", flexWrap: "wrap", gap: 8, marginBottom: 16 }}>
-                  {players.map((p, i) => (
+                  {players.map((p, i) => {
+                    const color = playerColors[p] || ACCENT;
+                    return (
                     <div key={p} className="btn-active" onClick={() => removePlayer(i)} style={{
-                      display: "flex", alignItems: "center", gap: 6, background: "#2a2a2a",
-                      borderRadius: 100, padding: "8px 14px 8px 18px", fontSize: 16, fontWeight: 600, cursor: "pointer"
+                      display: "flex", alignItems: "center", gap: 6,
+                      background: `${color}18`,
+                      border: `1.5px solid ${color}55`,
+                      borderRadius: 100, padding: "8px 14px 8px 12px", fontSize: 16, fontWeight: 700, cursor: "pointer",
+                      color: color,
                     }}>
+                      <span style={{
+                        width: 10, height: 10, borderRadius: "50%",
+                        background: color, flexShrink: 0,
+                        boxShadow: `0 0 6px ${color}88`,
+                      }} />
                       {p}
-                      <div style={{ background: DARK, color: MUTED, borderRadius: "50%", width: 22, height: 22, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 16, fontWeight: 800, paddingBottom: 2 }}>×</div>
+                      <div style={{ background: `${color}30`, color: color, borderRadius: "50%", width: 20, height: 20, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 14, fontWeight: 800, paddingBottom: 1 }}>×</div>
                     </div>
-                  ))}
+                    );
+                  })}
                 </div>
               )}
               <div style={{ display: "flex", gap: 10 }}>
@@ -1035,7 +1062,7 @@
       );
     };
 
-    const QuestionTurnScreen = ({ player, round, current, total, onShow }) => (
+    const QuestionTurnScreen = ({ player, round, current, total, onShow, playerColor }) => (
       <div style={S.page}>
         <style>{css}</style>
         <div style={S.inner}>
@@ -1044,10 +1071,10 @@
               Ronde {round} &nbsp;·&nbsp; {current}/{total}
             </div>
             <div style={{ fontSize: 80, marginBottom: 30 }}>👀</div>
-            <div style={{ fontSize: 40, fontWeight: 800, marginBottom: 16, letterSpacing: "-0.02em" }}>
-              Hey <span style={{ color: ACCENT }}>{player}</span>
+            <div style={{ fontSize: "clamp(32px, 10.7vw, 40px)", fontWeight: 800, marginBottom: 16, letterSpacing: "-0.02em" }}>
+              Hey <span style={{ color: playerColor || ACCENT }}>{player}</span>
             </div>
-            <div style={{ fontSize: 20, color: MUTED, lineHeight: 1.5, fontWeight: 500 }}>
+            <div style={{ fontSize: "clamp(17px, 5.4vw, 20px)", color: MUTED, lineHeight: 1.5, fontWeight: 500 }}>
               Pak de telefoon en lees jouw vraag.<br />De anderen kijken weg.
             </div>
           </div>
@@ -1076,10 +1103,10 @@
               </div>
             )}
             <Tag color={showAsImposter ? RED : ACCENT}>Jouw vraag</Tag>
-            <div style={{ fontSize: 32, fontWeight: 800, lineHeight: 1.4, marginBottom: 40, letterSpacing: "-0.02em" }}>
+            <div style={{ fontSize: "clamp(26px, 8.5vw, 32px)", fontWeight: 800, lineHeight: 1.4, marginBottom: 40, letterSpacing: "-0.02em" }}>
               {question}
             </div>
-            <div style={{ fontSize: 18, color: MUTED, lineHeight: 1.6, fontWeight: 500 }}>
+            <div style={{ fontSize: "clamp(16px, 4.8vw, 18px)", color: MUTED, lineHeight: 1.6, fontWeight: 500 }}>
               Onthoud je vraag goed.<br />Vertel niets aan de anderen. 🤐
             </div>
           </div>
@@ -1099,8 +1126,8 @@
         <div style={S.inner}>
           <div style={{ ...S.contentCenter, textAlign: "center" }}>
             <div style={{ fontSize: 80, marginBottom: 30 }}>✍️</div>
-            <div style={{ fontSize: 36, fontWeight: 800, marginBottom: 20, letterSpacing: "-0.02em" }}>Schrijf een naam op</div>
-            <div style={{ fontSize: 20, color: MUTED, marginBottom: 16, lineHeight: 1.6, fontWeight: 500 }}>
+            <div style={{ fontSize: "clamp(28px, 9.6vw, 36px)", fontWeight: 800, marginBottom: 20, letterSpacing: "-0.02em" }}>Schrijf een naam op</div>
+            <div style={{ fontSize: "clamp(17px, 5.4vw, 20px)", color: MUTED, marginBottom: 16, lineHeight: 1.6, fontWeight: 500 }}>
               Schrijf discreet op wie volgens jou bij jouw vraag past.
             </div>
             <div style={{ fontSize: 16, color: "#666", fontWeight: 500 }}>
@@ -1190,9 +1217,9 @@ const CountdownScreen = ({ countdown }) => {
         <div style={S.inner}>
           <div style={{ ...S.contentCenter, textAlign: "center" }}>
             <div style={{ fontSize: 80, marginBottom: 30 }}>👀</div>
-            <div style={{ fontSize: 36, fontWeight: 800, marginBottom: 20, letterSpacing: "-0.02em" }}>Namen tonen!</div>
-            <div style={{ fontSize: 20, color: MUTED, lineHeight: 1.6, fontWeight: 500 }}>
-              Heeft iedereen de namen gezien?<br />Druk op de knop de vraag te onthullen.
+            <div style={{ fontSize: "clamp(28px, 9.6vw, 36px)", fontWeight: 800, marginBottom: 20, letterSpacing: "-0.02em" }}>Namen tonen!</div>
+            <div style={{ fontSize: "clamp(17px, 5.4vw, 20px)", color: MUTED, lineHeight: 1.6, fontWeight: 500 }}>
+              Heeft iedereen de namen gezien?<br />Druk op de knop om de vraag te onthullen.
             </div>
           </div>
         </div>
@@ -1250,11 +1277,11 @@ const CountdownScreen = ({ countdown }) => {
           <div style={S.inner}>
             <div style={S.contentCenter}>
               <Tag color={ACCENT}>De vraag was</Tag>
-              <div style={{ fontSize: 32, fontWeight: 800, lineHeight: 1.4, marginBottom: 30, letterSpacing: "-0.02em" }}>
+              <div style={{ fontSize: "clamp(26px, 8.5vw, 32px)", fontWeight: 800, lineHeight: 1.4, marginBottom: 30, letterSpacing: "-0.02em" }}>
                 {normalQuestion}
               </div>
               <Divider />
-              <div style={{ fontSize: 20, color: MUTED, lineHeight: 1.6, fontWeight: 500 }}>
+              <div style={{ fontSize: "clamp(17px, 5.4vw, 20px)", color: MUTED, lineHeight: 1.6, fontWeight: 500 }}>
                 Overleg met de groep en wijs dan allemaal <strong style={{color: TEXT}}>tegelijk</strong> naar wie jij denkt dat de imposter is. ☝️
               </div>
             </div>
@@ -1327,18 +1354,20 @@ const CountdownScreen = ({ countdown }) => {
       );
     };
 
-    const ResultScreen = ({ imposterName, normalQ, imposterQ, onFound, onNotFound }) => (
+    const ResultScreen = ({ imposterName, normalQ, imposterQ, onFound, onNotFound, playerColors }) => {
+      const imposterColor = (playerColors && playerColors[imposterName]) || TEXT;
+      return (
       <div style={S.page}>
         <style>{css}</style>
         <div style={{ ...S.inner, paddingTop: 40 }}>
           <div style={{ fontSize: 14, color: MUTED, fontWeight: 800, letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: 8 }}>
             Uitslag
           </div>
-          <div style={{ fontSize: 36, fontWeight: 800, marginBottom: 12, letterSpacing: "-0.02em", lineHeight: 1.1 }}>
+          <div style={{ fontSize: "clamp(28px, 9.6vw, 36px)", fontWeight: 800, marginBottom: 12, letterSpacing: "-0.02em", lineHeight: 1.1 }}>
             Werd de imposter ontmaskerd?
           </div>
-          <div style={{ fontSize: 20, color: MUTED, marginBottom: 40, fontWeight: 500 }}>
-            De imposter was <strong style={{ color: TEXT, fontWeight: 800 }}>{imposterName}</strong>
+          <div style={{ fontSize: "clamp(17px, 5.4vw, 20px)", color: MUTED, marginBottom: 40, fontWeight: 500 }}>
+            De imposter was <strong style={{ color: imposterColor, fontWeight: 800 }}>{imposterName}</strong>
           </div>
 
           <Card style={{ padding: "28px 24px" }}>
@@ -1354,7 +1383,8 @@ const CountdownScreen = ({ countdown }) => {
           <BigBtn onClick={onNotFound} bg={RED} color="#fff">Nee, {imposterName} wint</BigBtn>
         </div>
       </div>
-    );
+      );
+    };
 
     const ConfettiBlast = () => {
       const pieces = React.useMemo(() => {
@@ -1388,12 +1418,16 @@ const CountdownScreen = ({ countdown }) => {
       );
     };
 
-    const ScoreboardScreen = ({ players, scores, round, onPlayAgain, onNewGame, onReset, targetEnabled, targetScore }) => {
+    const ScoreboardScreen = ({ players, scores, round, onPlayAgain, onNewGame, onReset, targetEnabled, targetScore, playerColors = {}, playerStats = {} }) => {
       const sorted = [...players].sort((a, b) => (scores[b] || 0) - (scores[a] || 0));
       const maxScore = Math.max(...players.map(p => scores[p] || 0), 1);
       const medals = ["🥇", "🥈", "🥉"];
 
       const winner = targetEnabled ? sorted.find(p => (scores[p] || 0) >= targetScore) : null;
+
+      const maxImposter = Math.max(...players.map(p => (playerStats[p]?.timesImposter || 0)));
+      const topImposters = maxImposter > 0 ? players.filter(p => (playerStats[p]?.timesImposter || 0) === maxImposter) : [];
+      const neverCaught = players.filter(p => (playerStats[p]?.timesImposter || 0) > 0 && (playerStats[p]?.timesCaught || 0) === 0);
 
       return (
         <div style={S.page}>
@@ -1403,7 +1437,7 @@ const CountdownScreen = ({ countdown }) => {
               <div style={{ fontSize: 14, color: MUTED, fontWeight: 800, letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: 0 }}>
                 {round} ronde{round !== 1 ? "s" : ""} gespeeld
               </div>
-              <div style={{ fontSize: 44, fontWeight: 800, letterSpacing: "-0.03em" }}>Scorebord</div>
+              <div style={{ fontSize: "clamp(36px, 11.7vw, 44px)", fontWeight: 800, letterSpacing: "-0.03em" }}>Scorebord</div>
             </div>
 
             {winner && (
@@ -1411,7 +1445,7 @@ const CountdownScreen = ({ countdown }) => {
                 <ConfettiBlast />
                 <div style={{ fontSize: 52, marginBottom: 10 }}>🏆</div>
                 <div style={{
-                  fontSize: 26, fontWeight: 800, color: GREEN, marginBottom: 4,
+                  fontSize: "clamp(22px, 7vw, 26px)", fontWeight: 800, color: GREEN, marginBottom: 4,
                   animation: "winnerPulse 1.8s ease-in-out infinite",
                   display: "inline-block",
                 }}>
@@ -1433,15 +1467,24 @@ const CountdownScreen = ({ countdown }) => {
               {sorted.map((name, i) => {
                 const score = scores[name] || 0;
                 const isWinner = name === winner;
+                const playerColor = playerColors[name] || (i === 0 ? ACCENT : "#666");
                 return (
                   <div key={name}>
                     {i > 0 && <div style={{ height: 2, background: BORDER, margin: "16px 0", borderRadius: 2 }} />}
                     <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
                       <span style={{ fontSize: 28, width: 36, textAlign: "center" }}>{medals[i] || <span style={{fontSize: 18, color: MUTED, fontWeight: 800}}>{i+1}</span>}</span>
                       <div style={{ flex: 1 }}>
-                        <div style={{ fontSize: 20, fontWeight: 800, marginBottom: 8, color: isWinner ? GREEN : TEXT }}>{name}</div>
+                        <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 8 }}>
+                          <div style={{
+                            width: 10, height: 10, borderRadius: "50%",
+                            background: playerColor,
+                            boxShadow: `0 0 6px ${playerColor}88`,
+                            flexShrink: 0,
+                          }} />
+                          <div style={{ fontSize: "clamp(17px, 5.4vw, 20px)", fontWeight: 800, color: TEXT }}>{name}</div>
+                        </div>
                         <div style={{ background: "#2a2a2a", borderRadius: 100, height: 8, overflow: "hidden" }}>
-                          <div style={{ height: "100%", borderRadius: 100, width: `${(score / (targetEnabled ? Math.max(maxScore, targetScore) : maxScore)) * 100}%`, background: isWinner ? GREEN : i === 0 ? ACCENT : "#666", transition: "width 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275)" }} />
+                          <div style={{ height: "100%", borderRadius: 100, width: `${(score / (targetEnabled ? Math.max(maxScore, targetScore) : maxScore)) * 100}%`, background: playerColor, transition: "width 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275)" }} />
                         </div>
                         {targetEnabled && (
                           <div style={{ fontSize: 12, color: MUTED, fontWeight: 600, marginTop: 4 }}>
@@ -1449,12 +1492,47 @@ const CountdownScreen = ({ countdown }) => {
                           </div>
                         )}
                       </div>
-                      <span style={{ fontSize: 28, fontWeight: 800, color: isWinner ? GREEN : i === 0 ? ACCENT : TEXT, minWidth: 40, textAlign: "right" }}>{score}</span>
+                      <span style={{ fontSize: "clamp(22px, 7.5vw, 28px)", fontWeight: 800, color: playerColor, minWidth: 40, textAlign: "right" }}>{score}</span>
                     </div>
                   </div>
                 );
               })}
             </Card>
+
+            {(topImposters.length > 0 || neverCaught.length > 0) && round >= 2 && (
+              <div style={{ display: "flex", flexDirection: "column", gap: 6, marginTop: 14 }}>
+                {topImposters.length > 0 && (
+                  <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                    <span style={{ fontSize: 16, width: 22, textAlign: "center", flexShrink: 0 }}>🕵️</span>
+                    <span style={{ fontSize: 13, color: MUTED, fontWeight: 600, flexShrink: 0 }}>Meeste keer imposter —</span>
+                    <span style={{ fontSize: 13, fontWeight: 800, minWidth: 0 }}>
+                      {topImposters.map((n, i) => (
+                        <span key={n}>
+                          <span style={{ color: playerColors[n] || ACCENT }}>{n}</span>
+                          {i < topImposters.length - 1 && <span style={{ color: MUTED }}> & </span>}
+                        </span>
+                      ))}
+                      <span style={{ color: MUTED, fontWeight: 600 }}> ({maxImposter}×)</span>
+                    </span>
+                  </div>
+                )}
+                {neverCaught.length > 0 && (
+                  <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                    <span style={{ fontSize: 16, width: 22, textAlign: "center", flexShrink: 0 }}>🎯</span>
+                    <span style={{ fontSize: 13, color: MUTED, fontWeight: 600, flexShrink: 0 }}>Nooit gepakt —</span>
+                    <span style={{ fontSize: 13, fontWeight: 800, minWidth: 0 }}>
+                      {neverCaught.map((n, i) => (
+                        <span key={n}>
+                          <span style={{ color: playerColors[n] || GREEN }}>{n}</span>
+                          {i < neverCaught.length - 1 && <span style={{ color: MUTED }}>, </span>}
+                        </span>
+                      ))}
+                    </span>
+                  </div>
+                )}
+              </div>
+            )}
+
           </div>
           <div style={{ ...S.footer, display: "flex", flexDirection: "column", gap: 16 }}>
             {winner ? (
@@ -1475,6 +1553,8 @@ const CountdownScreen = ({ countdown }) => {
       const [players, setPlayers] = useState(() => {
         try { return JSON.parse(localStorage.getItem("imposter_players")) || []; } catch { return []; }
       });
+      const [playerColors, setPlayerColors] = useState({});
+      const [playerStats, setPlayerStats] = useState({});
       const [newPlayer, setNewPlayer] = useState("");
       const [roundPlayerOrder, setRoundPlayerOrder] = useState([]);
       const [round, setRound] = useState(0);
@@ -1631,6 +1711,14 @@ const CountdownScreen = ({ countdown }) => {
         if (players.length < MAX_PLAYERS) {
           setPlayers(prev => [...prev, name]);
           setScores(prev => ({ ...prev, [name]: prev[name] || 0 }));
+          // Altijd nieuwe willekeurige kleur (ook voor terugkerende spelers)
+          setPlayerColors(prev => {
+            const usedColors = Object.values(prev);
+            const available = PLAYER_COLORS.filter(c => !usedColors.includes(c));
+            const pool = available.length > 0 ? available : PLAYER_COLORS;
+            const color = pool[Math.floor(Math.random() * pool.length)];
+            return { ...prev, [name]: color };
+          });
           setNewPlayer("");
           setPlayerError("");
         }
@@ -1665,13 +1753,24 @@ const CountdownScreen = ({ countdown }) => {
       }, [phase]);
 
       const handleResult = (imposterFound) => {
+        const imposterName = roundPlayerOrder[imposterIdx];
         setScores(prev => {
           const s = { ...prev };
           if (imposterFound) {
             roundPlayerOrder.forEach((p, i) => { if (i !== imposterIdx) s[p] = (s[p] || 0) + 1; });
           } else {
-            s[roundPlayerOrder[imposterIdx]] = (s[roundPlayerOrder[imposterIdx]] || 0) + 2;
+            s[imposterName] = (s[imposterName] || 0) + 2;
           }
+          return s;
+        });
+        setPlayerStats(prev => {
+          const s = { ...prev };
+          if (!s[imposterName]) s[imposterName] = { timesImposter: 0, timesCaught: 0 };
+          s[imposterName] = {
+            ...s[imposterName],
+            timesImposter: (s[imposterName].timesImposter || 0) + 1,
+            timesCaught: (s[imposterName].timesCaught || 0) + (imposterFound ? 1 : 0),
+          };
           return s;
         });
         setPhase(PHASES.SCOREBOARD);
@@ -1679,18 +1778,14 @@ const CountdownScreen = ({ countdown }) => {
 
       const resetGame = () => {
         setPhase(PHASES.SETUP); 
-        // setPlayers([]) is weggehaald zodat ze blijven staan
         setRound(0);
-        
-        // Zet de scores van de huidige spelers terug op 0
         const freshScores = {};
         players.forEach(p => { freshScores[p] = 0; });
         setScores(freshScores);
-        
+        setPlayerStats({});
         setImposterIdx(null);
         setAvailablePrompts([...promptPool]);
         try {
-          // localStorage.removeItem("imposter_players") is weggehaald!
           localStorage.setItem("imposter_scores", JSON.stringify(freshScores));
           localStorage.removeItem("imposter_available_prompts");
         } catch {}
@@ -1783,10 +1878,10 @@ const CountdownScreen = ({ countdown }) => {
           )}
           
           {phase === PHASES.SETUP && (
-            <SetupScreen players={players} newPlayer={newPlayer} setNewPlayer={setNewPlayer} addPlayer={addPlayer} removePlayer={removePlayer} startGame={() => startGame()} onOpenPrompts={() => setShowPrompts(true)} onOpenInstructions={() => setShowInstructions(true)} onOpenSettings={() => setShowSettings(true)} questionError={effectiveQuestionError} playerError={playerError} setPlayerError={setPlayerError} settings={settings} onUpdateSettings={(key, val) => setSettings(prev => ({ ...prev, [key]: val }))} />
+            <SetupScreen players={players} newPlayer={newPlayer} setNewPlayer={setNewPlayer} addPlayer={addPlayer} removePlayer={removePlayer} startGame={() => startGame()} onOpenPrompts={() => setShowPrompts(true)} onOpenInstructions={() => setShowInstructions(true)} onOpenSettings={() => setShowSettings(true)} questionError={effectiveQuestionError} playerError={playerError} setPlayerError={setPlayerError} settings={settings} onUpdateSettings={(key, val) => setSettings(prev => ({ ...prev, [key]: val }))} playerColors={playerColors} />
           )}
           {phase === PHASES.QUESTION_TURN && (
-            <QuestionTurnScreen player={roundPlayerOrder[currentPlayerIdx]} round={round} current={currentPlayerIdx + 1} total={roundPlayerOrder.length} onShow={() => setPhase(PHASES.SHOW_QUESTION)} />
+            <QuestionTurnScreen player={roundPlayerOrder[currentPlayerIdx]} round={round} current={currentPlayerIdx + 1} total={roundPlayerOrder.length} onShow={() => setPhase(PHASES.SHOW_QUESTION)} playerColor={playerColors[roundPlayerOrder[currentPlayerIdx]]} />
           )}
           {phase === PHASES.SHOW_QUESTION && (
             <ShowQuestionScreen isImposter={currentPlayerIdx === imposterIdx} question={currentPlayerIdx === imposterIdx ? currentImposterQ : currentNormalQ} isLast={currentPlayerIdx + 1 === roundPlayerOrder.length} onDone={doneReading} blindImposter={settings.blindImposter} />
@@ -1809,7 +1904,7 @@ const CountdownScreen = ({ countdown }) => {
             />
           )}
           {phase === PHASES.RESULT && (
-            <ResultScreen imposterName={roundPlayerOrder[imposterIdx]} normalQ={currentNormalQ} imposterQ={currentImposterQ} onFound={() => handleResult(true)} onNotFound={() => handleResult(false)} />
+            <ResultScreen imposterName={roundPlayerOrder[imposterIdx]} normalQ={currentNormalQ} imposterQ={currentImposterQ} onFound={() => handleResult(true)} onNotFound={() => handleResult(false)} playerColors={playerColors} />
           )}
           {phase === PHASES.SCOREBOARD && (
             <ScoreboardScreen
@@ -1821,6 +1916,8 @@ const CountdownScreen = ({ countdown }) => {
               onReset={resetGame}
               targetEnabled={settings.targetEnabled}
               targetScore={settings.targetScore}
+              playerColors={playerColors}
+              playerStats={playerStats}
             />
           )}
         </React.Fragment>
