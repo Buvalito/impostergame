@@ -1389,7 +1389,7 @@ const CountdownScreen = ({ countdown }) => {
               Wie ontmaskerde de imposter?
             </div>
             <div style={{ fontSize: "clamp(15px, 4.8vw, 17px)", color: MUTED, fontWeight: 500, marginBottom: 32 }}>
-              Duid aan wie de imposter correct aanwees.
+              Duid aan wie juist was.
             </div>
 
             <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
@@ -1407,7 +1407,7 @@ const CountdownScreen = ({ countdown }) => {
                       padding: "16px 20px",
                       background: isSelected ? `${color}18` : CARD,
                       border: `1px solid ${isSelected ? color : BORDER}`,
-                      borderRadius: 16,
+                      borderRadius: 20,
                       cursor: "pointer",
                       textAlign: "left",
                       fontFamily: "'Outfit', sans-serif",
@@ -1566,38 +1566,38 @@ const CountdownScreen = ({ countdown }) => {
                 {topGuessers.length > 0 && (
                   <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
                     <span style={{ fontSize: 16, width: 22, textAlign: "center", flexShrink: 0 }}>🔍</span>
-                    <span style={{ fontSize: 13, color: MUTED, fontWeight: 600, flexShrink: 0 }}>Beste speurder —</span>
-                    <span style={{ fontSize: 13, fontWeight: 800, minWidth: 0 }}>
+                    <span style={{ fontSize: 14, color: MUTED, fontWeight: 600, flexShrink: 0 }}>Beste speurder —</span>
+                    <span style={{ fontSize: 14, fontWeight: 800, minWidth: 0 }}>
                       {topGuessers.map((n, i) => (
                         <span key={n}>
                           <span style={{ color: playerColors[n] || ACCENT }}>{n}</span>
                           {i < topGuessers.length - 1 && <span style={{ color: MUTED }}> & </span>}
                         </span>
                       ))}
-                      <span style={{ color: MUTED, fontWeight: 600 }}> ({maxGuessed}×)</span>
+
                     </span>
                   </div>
                 )}
                 {topImposters.length > 0 && (
                   <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
                     <span style={{ fontSize: 16, width: 22, textAlign: "center", flexShrink: 0 }}>🕵️</span>
-                    <span style={{ fontSize: 13, color: MUTED, fontWeight: 600, flexShrink: 0 }}>Meeste keer imposter —</span>
-                    <span style={{ fontSize: 13, fontWeight: 800, minWidth: 0 }}>
+                    <span style={{ fontSize: 14, color: MUTED, fontWeight: 600, flexShrink: 0 }}>Meeste keer imposter —</span>
+                    <span style={{ fontSize: 14, fontWeight: 800, minWidth: 0 }}>
                       {topImposters.map((n, i) => (
                         <span key={n}>
                           <span style={{ color: playerColors[n] || ACCENT }}>{n}</span>
                           {i < topImposters.length - 1 && <span style={{ color: MUTED }}> & </span>}
                         </span>
                       ))}
-                      <span style={{ color: MUTED, fontWeight: 600 }}> ({maxImposter}×)</span>
+
                     </span>
                   </div>
                 )}
                 {neverCaught.length > 0 && (
                   <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
                     <span style={{ fontSize: 16, width: 22, textAlign: "center", flexShrink: 0 }}>🎯</span>
-                    <span style={{ fontSize: 13, color: MUTED, fontWeight: 600, flexShrink: 0 }}>Nooit gepakt —</span>
-                    <span style={{ fontSize: 13, fontWeight: 800, minWidth: 0 }}>
+                    <span style={{ fontSize: 14, color: MUTED, fontWeight: 600, flexShrink: 0 }}>Nooit gepakt —</span>
+                    <span style={{ fontSize: 14, fontWeight: 800, minWidth: 0 }}>
                       {neverCaught.map((n, i) => (
                         <span key={n}>
                           <span style={{ color: playerColors[n] || GREEN }}>{n}</span>
