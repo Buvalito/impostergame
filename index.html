@@ -1212,7 +1212,7 @@ const CountdownScreen = ({ countdown }) => {
   );
 };
 
-    const READING_DELAY = 5; // seconden leestijd voor de timer start
+    const READING_DELAY = 3; // seconden leestijd voor de timer start
 
     const ShowNamesScreen = ({ onReveal, timerEnabled, timerSeconds }) => {
       const [readingLeft, setReadingLeft] = useState(timerEnabled ? READING_DELAY : 0);
@@ -1545,12 +1545,14 @@ const CountdownScreen = ({ countdown }) => {
                           }} />
                           <div style={{ fontSize: "clamp(17px, 5.4vw, 20px)", fontWeight: 800, color: TEXT }}>{name}</div>
                         </div>
-                        <div style={{ background: "#2a2a2a", borderRadius: 100, height: 8, overflow: "hidden" }}>
+                        <div style={{ background: "#2a2a2a", borderRadius: 100, height: 8, overflow: "hidden", marginBottom: 6 }}>
                           <div style={{ height: "100%", borderRadius: 100, width: `${(score / (targetEnabled ? Math.max(maxScore, targetScore) : maxScore)) * 100}%`, background: playerColor, transition: "width 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275)" }} />
                         </div>
-                        {targetEnabled && (
-                          <div style={{ fontSize: 12, color: MUTED, fontWeight: 600, marginTop: 4 }}>
-                            {Math.max(0, targetScore - score)} punt{Math.max(0, targetScore - score) !== 1 ? "en" : ""} te gaan
+                        {round >= 2 && (topGuessers.includes(name) || topImposters.includes(name) || neverCaught.includes(name)) && (
+                          <div style={{ display: "flex", gap: 4, marginTop: 2 }}>
+                            {topGuessers.includes(name) && <span style={{ fontSize: 12 }}>🔍</span>}
+                            {topImposters.includes(name) && <span style={{ fontSize: 12 }}>🕵️</span>}
+                            {neverCaught.includes(name) && <span style={{ fontSize: 12 }}>🎯</span>}
                           </div>
                         )}
                       </div>
@@ -1566,12 +1568,12 @@ const CountdownScreen = ({ countdown }) => {
                 {topGuessers.length > 0 && (
                   <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
                     <span style={{ fontSize: 16, width: 22, textAlign: "center", flexShrink: 0 }}>🔍</span>
-                    <span style={{ fontSize: 14, color: MUTED, fontWeight: 600, flexShrink: 0 }}>Beste speurder —</span>
+                    <span style={{ fontSize: 14, color: MUTED, fontWeight: 600, flexShrink: 0 }}>Beste speurder(s) —</span>
                     <span style={{ fontSize: 14, fontWeight: 800, minWidth: 0 }}>
                       {topGuessers.map((n, i) => (
                         <span key={n}>
                           <span style={{ color: playerColors[n] || ACCENT }}>{n}</span>
-                          {i < topGuessers.length - 1 && <span style={{ color: MUTED }}> & </span>}
+                          {i < topGuessers.length - 1 && <span style={{ color: MUTED }}>, </span>}
                         </span>
                       ))}
 
@@ -1586,7 +1588,7 @@ const CountdownScreen = ({ countdown }) => {
                       {topImposters.map((n, i) => (
                         <span key={n}>
                           <span style={{ color: playerColors[n] || ACCENT }}>{n}</span>
-                          {i < topImposters.length - 1 && <span style={{ color: MUTED }}> & </span>}
+                          {i < topImposters.length - 1 && <span style={{ color: MUTED }}>, </span>}
                         </span>
                       ))}
 
