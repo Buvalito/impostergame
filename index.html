@@ -168,7 +168,7 @@
       SCOREBOARD:      "scoreboard",
     };
 
-    const MAX_PLAYERS = 10;
+    const MAX_PLAYERS = 12;
 
     const PLAYER_COLORS = [
       "#e8c547","#52c98a","#e05252","#52b8e0",
@@ -666,7 +666,7 @@
               </div>
             </div>
             <div style={{ paddingTop: 16 }}>
-              <BigBtn onClick={onClose}>Sluiten</BigBtn>
+              <BigBtn onClick={onClose}>Ga terug</BigBtn>
             </div>
           </div>
         </div>
@@ -874,12 +874,12 @@
                   ))}
                   <div style={{ height: 1, background: BORDER, margin: "4px 0" }} />
                   <div style={{ fontSize: 13, color: MUTED, fontWeight: 500, lineHeight: 1.6 }}>
-                    Imposter is een gratis party game voor groepen van 3 tot 12 spelers. Eén speler is de imposter en krijgt een andere vraag. Wie ontmaskert hem of haar?
+                    Imposter is een party game voor groepen van 3 tot 12 spelers. Eén speler is de imposter en krijgt een andere vraag. Wie ontmaskert hem of haar?
                   </div>
                   <div style={{ height: 1, background: BORDER, margin: "4px 0" }} />
                   <div style={{ fontSize: 13, fontWeight: 700, color: MUTED, letterSpacing: "0.06em", textTransform: "uppercase", marginBottom: 6 }}>Feedback geven</div>
                   <div style={{ fontSize: 13, color: MUTED, fontWeight: 500, lineHeight: 1.6, marginBottom: 10 }}>
-                    Heb je ideeën voor nieuwe vragen, categorieën of functies? Of heb je een bug gevonden? We horen het graag via ons feedbackformulier!
+                    Heb je ideeën voor nieuwe vragen, categorieën of functies? Of heb je een bug gevonden?
                   </div>
                   <div style={{ position: "relative", display: "inline-block" }}>
                     <span style={{
@@ -996,7 +996,7 @@
     const SetupScreen = ({
       players, newPlayer, setNewPlayer, addPlayer, removePlayer, startGame,
       onOpenPrompts, onOpenInstructions, onOpenSettings, questionError,
-      playerError, setPlayerError, settings = {}, onUpdateSettings,
+      playerError, setPlayerError, settings = {}, onUpdateSettings, onToggleCustomOnly,
       playerColors = {}, selectedCategories, onToggleCategory, promptPoolCount
     }) => {
       const inputRef = useRef(null);
@@ -1250,7 +1250,7 @@
                 </div>
               )}
 
-              <SettingRow emoji="📝" label="Enkel eigen vragen" subtitle="Schakel de standaardvragen uit en speel enkel met jouw zelf toegevoegde prompts." currentValue={settings.customOnly} onToggle={() => updateSetting("customOnly", !settings.customOnly)} />
+              <SettingRow emoji="📝" label="Enkel eigen vragen" subtitle="Schakel de standaardvragen uit en speel enkel met jouw zelf toegevoegde prompts." currentValue={settings.customOnly} onToggle={onToggleCustomOnly || (() => updateSetting("customOnly", !settings.customOnly))} />
 
               <SettingRow emoji="😈" label="Bewuste imposter" subtitle="De imposter weet meteen tijdens het lezen van de vraag dat hij/zij de imposter is." currentValue={settings.blindImposter} invertToggle noBorder onToggle={() => updateSetting("blindImposter", !settings.blindImposter)} />
             </Card>
@@ -1877,7 +1877,6 @@
 
       // Onthoud welke categorieën geselecteerd waren vóór "enkel eigen vragen" werd ingeschakeld
       const savedCategoriesRef = useRef(null);
-      const isMountedRef = useRef(false);
 
       // promptPool is computed (niet meer als state)
       const promptPool = useMemo(() => {
@@ -1958,26 +1957,21 @@
         }
       }, [selectedCategories]);
 
-      useEffect(() => {
-        try { localStorage.setItem("imposter_settings", JSON.stringify(settings)); } catch {}
+      // ── CustomOnly toggle (synchroon gebatcht om flash te vermijden) ──────────
+      const toggleCustomOnly = () => {
+        const newVal = !settings.customOnly;
+        setSettings(prev => ({ ...prev, customOnly: newVal }));
         setQuestionError("");
-        if (!isMountedRef.current) {
-          isMountedRef.current = true;
-          return; // sla de eerste mount over zodat localStorage-selectie bewaard blijft
-        }
-        if (settings.customOnly) {
-          // Sla huidige categorieën op en deselecteer ze allemaal
+        if (newVal) {
           savedCategoriesRef.current = selectedCategories;
           setSelectedCategories([]);
           setAvailablePrompts([...customQuestions]);
         } else {
-          // Herstel de vorige categorieselectie (of standaard "klassiek")
           const restored = savedCategoriesRef.current || ["klassiek"];
           savedCategoriesRef.current = null;
           setSelectedCategories(restored);
-          // promptPool update happens via selectedCategories effect
         }
-      }, [settings.customOnly]);
+      };
 
       useEffect(() => {
         try { localStorage.setItem("imposter_settings", JSON.stringify(settings)); } catch {}
@@ -2248,6 +2242,7 @@
               setPlayerError={setPlayerError}
               settings={settings}
               onUpdateSettings={(key, val) => setSettings(prev => ({ ...prev, [key]: val }))}
+              onToggleCustomOnly={toggleCustomOnly}
               playerColors={playerColors}
               selectedCategories={selectedCategories}
               onToggleCategory={toggleCategory}
