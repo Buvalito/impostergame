@@ -608,6 +608,71 @@
       );
     };
 
+    // ─── Legal Modal ──────────────────────────────────────────────────────────
+
+    const LegalModal = ({ type, onClose }) => {
+      const isPrivacy = type === "privacy";
+      const title = isPrivacy ? "Privacybeleid" : "Gebruiksvoorwaarden";
+      const emoji = isPrivacy ? "🔒" : "📋";
+
+      const privacyContent = [
+        { heading: "Welke gegevens slaan we op?", body: "Imposter slaat uitsluitend gegevens op in de lokale opslag (localStorage) van jouw apparaat. Dit omvat spelernamen, scores, eigen vragen en instellingen. Er worden geen gegevens naar externe servers verstuurd." },
+        { heading: "Waarvoor worden de gegevens gebruikt?", body: "De opgeslagen gegevens worden uitsluitend gebruikt om jouw spelervaring te bewaren tussen sessies — zoals je spelerlijst, scores en voorkeursinstellingen. Ze worden nooit gebruikt voor reclame, tracking of profilering." },
+        { heading: "Worden gegevens gedeeld?", body: "Nee. Er worden geen gegevens gedeeld met derden. De app maakt geen verbinding met externe servers of analysediensten." },
+        { heading: "Hoe verwijder je je gegevens?", body: "Je kunt jouw lokale gegevens verwijderen via de browserinstellingen (localStorage wissen) of door de appdata van je browser te verwijderen. Hiermee worden alle opgeslagen spelernamen, vragen en scores gewist." },
+        { heading: "Cookies", body: "De app gebruikt geen cookies." },
+        { heading: "Wijzigingen", body: "Dit privacybeleid kan worden bijgewerkt bij nieuwe versies van de app. De huidige versie is altijd zichtbaar in de instellingen onder 'Over de app'." },
+      ];
+
+      const termsContent = [
+        { heading: "Gebruik van de app", body: "Imposter — The Party Game is een gratis, browsergebaseerd feestspel bedoeld voor gebruik in groepen. De app is uitsluitend bedoeld voor recreatief gebruik door personen van 16 jaar en ouder (of met toestemming van een ouder/voogd voor de categorie 'Pittig')." },
+        { heading: "Eigen vragen", body: "Gebruikers kunnen eigen vragen toevoegen aan het spel. Je bent zelf verantwoordelijk voor de inhoud van deze vragen. Vragen die aanzetten tot haat, discriminatie of geweld zijn verboden." },
+        { heading: "Aansprakelijkheid", body: "De ontwikkelaar is niet aansprakelijk voor enige schade, conflicten of andere gevolgen die voortvloeien uit het gebruik van de app of de inhoud van de vragen. Het spel is bedoeld als amusement en dient als zodanig te worden gebruikt." },
+        { heading: "Intellectuele eigendom", body: "De inhoud van de app, inclusief vragen, ontwerp en code, is eigendom van de ontwikkelaar. Kopiëren of hergebruiken zonder toestemming is niet toegestaan." },
+        { heading: "Beschikbaarheid", body: "De app wordt aangeboden 'zoals het is'. We garanderen geen ononderbroken beschikbaarheid en behouden ons het recht voor om de app op elk moment te wijzigen of stop te zetten." },
+        { heading: "Toepasselijk recht", body: "Op deze gebruiksvoorwaarden is het Belgisch recht van toepassing." },
+      ];
+
+      const content = isPrivacy ? privacyContent : termsContent;
+
+      return (
+        <div style={{
+          position: "fixed", inset: 0,
+          background: "rgba(17,17,17,0.95)",
+          backdropFilter: "blur(12px)", WebkitBackdropFilter: "blur(12px)",
+          zIndex: 200,
+          display: "flex", flexDirection: "column", alignItems: "center",
+          fontFamily: "'Outfit', sans-serif",
+          animation: "fadeIn 0.2s ease-in-out",
+        }}>
+          <style>{css}</style>
+          <div style={{ width: "100%", maxWidth: "500px", height: "100%", display: "flex", flexDirection: "column", padding: "24px 24px calc(24px + env(safe-area-inset-bottom))" }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 28 }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+                <span style={{ fontSize: 22 }}>{emoji}</span>
+                <h2 style={{ fontSize: 22, fontWeight: 800, color: TEXT, letterSpacing: "-0.02em", margin: 0 }}>{title}</h2>
+              </div>
+              <button onClick={onClose} className="btn-active" style={{ background: "rgba(255,255,255,0.1)", border: "none", color: TEXT, width: 40, height: 40, borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 24, cursor: "pointer", flexShrink: 0 }}>×</button>
+            </div>
+            <div style={{ flex: 1, overflowY: "auto", display: "flex", flexDirection: "column", gap: 0 }}>
+              {content.map((section, i) => (
+                <div key={i} style={{ padding: "16px 0", borderBottom: i < content.length - 1 ? `1px solid ${BORDER}` : "none" }}>
+                  <div style={{ fontSize: 15, fontWeight: 700, color: TEXT, marginBottom: 6 }}>{section.heading}</div>
+                  <div style={{ fontSize: 14, color: MUTED, fontWeight: 500, lineHeight: 1.65 }}>{section.body}</div>
+                </div>
+              ))}
+              <div style={{ paddingTop: 20, fontSize: 12, color: "#444", fontWeight: 600 }}>
+                 Imposter — The Party Game · v{APP_VERSION} 
+              </div>
+            </div>
+            <div style={{ paddingTop: 16 }}>
+              <BigBtn onClick={onClose}>Sluiten</BigBtn>
+            </div>
+          </div>
+        </div>
+      );
+    };
+
     // ─── Settings Modal ────────────────────────────────────────────────────────
 
     const Toggle = ({ enabled, onToggle }) => (
@@ -677,7 +742,7 @@
       </div>
     );
 
-    const APP_VERSION = "2.0.4";
+    const APP_VERSION = "3.0.0 (beta)";
     const LANGUAGES = [
       { code: "nl", label: "Nederlands"},
       { code: "en", label: "English"},
@@ -685,10 +750,12 @@
 
     const SettingsModal = ({ settings, onSave, onClose }) => {
       const [local, setLocal] = useState({ ...settings });
+      const [legalDoc, setLegalDoc] = useState(null); // "privacy" | "terms" | null
 
       const update = (key, val) => setLocal(prev => ({ ...prev, [key]: val }));
 
       return (
+        <React.Fragment>
         <div style={{
           position: "fixed",
           inset: 0,
@@ -738,40 +805,50 @@
 
               {/* Taal */}
               <div style={{ paddingBottom: 24, marginBottom: 4, borderBottom: `1px solid ${BORDER}` }}>
-                <div style={{ display: "flex", alignItems: "center", gap: 14, marginBottom: 6 }}>
-                  <span style={{ fontSize: 22, lineHeight: 1 }}>🌐</span>
-                  <div>
-                    <div style={{ fontSize: 17, fontWeight: 700, color: TEXT, marginBottom: 5 }}>Taal</div>
-                    <div style={{ fontSize: 14, color: MUTED, fontWeight: 500 }}>Kies de taal van de app.</div>
-                  </div>
+                <div style={{ display: "flex", alignItems: "center", gap: 14, marginBottom: 16 }}>
+                  <span style={{ fontSize: 22, lineHeight: 1, flexShrink: 0 }}>🌐</span>
+                  <div style={{ fontSize: 17, fontWeight: 700, color: TEXT }}>Taal</div>
                 </div>
-                <div style={{ display: "flex", gap: 10, paddingLeft: 36, marginTop: 14 }}>
-                  {LANGUAGES.map(lang => (
+                <div style={{ fontSize: 14, color: MUTED, fontWeight: 500, paddingLeft: 36, marginBottom: 14 }}>Kies de taal van de app.</div>
+                <div style={{ display: "flex", gap: 8, paddingLeft: 36 }}>
+                  {LANGUAGES.map(lang => {
+                    const isUnavailable = lang.code === "en";
+                    const isActive = !isUnavailable && (local.language || "nl") === lang.code;
+                    return (
                     <button
                       key={lang.code}
-                      className="btn-active"
-                      onClick={() => update("language", lang.code)}
+                      className={isUnavailable ? "" : "btn-active"}
+                      onClick={() => !isUnavailable && update("language", lang.code)}
                       style={{
+                        position: "relative",
                         flex: 1,
-                        padding: "12px 10px",
-                        borderRadius: 14,
-                        border: `2px solid ${(local.language || "nl") === lang.code ? ACCENT : BORDER}`,
-                        background: (local.language || "nl") === lang.code ? `${ACCENT}15` : "#1a1a1a",
-                        color: (local.language || "nl") === lang.code ? ACCENT : MUTED,
+                        padding: "11px 10px",
+                        borderRadius: 16,
+                        border: `1px solid ${isActive ? ACCENT : BORDER}`,
+                        background: isActive ? `${ACCENT}15` : "#1a1a1a",
+                        color: isUnavailable ? "#444" : isActive ? ACCENT : MUTED,
                         fontFamily: "'Outfit', sans-serif",
                         fontSize: 14,
                         fontWeight: 700,
-                        cursor: "pointer",
                         display: "flex",
                         alignItems: "center",
                         justifyContent: "center",
-                        gap: 8,
                         transition: "all 0.15s ease",
                       }}
                     >
+                      {isUnavailable && (
+                        <span style={{
+                          position: "absolute", top: -7, right: 0,
+                          background: ACCENT, color: "#111",
+                          borderRadius: 100, fontSize: 9, fontWeight: 800,
+                          padding: "2px 7px", letterSpacing: "0.05em", textTransform: "uppercase",
+                          animation: "badgePop 0.3s ease",
+                        }}>Binnenkort</span>
+                      )}
                       {lang.label}
                     </button>
-                  ))}
+                    );
+                  })}
                 </div>
                 <div style={{ fontSize: 12, color: "#555", fontWeight: 600, marginTop: 10, paddingLeft: 36 }}>
                   Meer talen volgen in een toekomstige update.
@@ -781,38 +858,78 @@
               {/* Over de app */}
               <div style={{ padding: "20px 0", borderBottom: `1px solid ${BORDER}` }}>
                 <div style={{ display: "flex", alignItems: "center", gap: 14, marginBottom: 16 }}>
-                  <span style={{ fontSize: 22, lineHeight: 1 }}>📱</span>
+                  <span style={{ fontSize: 22, lineHeight: 1, flexShrink: 0 }}>📱</span>
                   <div style={{ fontSize: 17, fontWeight: 700, color: TEXT }}>Over de app</div>
                 </div>
                 <div style={{ paddingLeft: 36, display: "flex", flexDirection: "column", gap: 12 }}>
                   {[
-                    { label: "App naam", value: "Imposter — The Party Game" },
+                    { label: "Naam", value: "Imposter — The Party Game" },
                     { label: "Versie", value: APP_VERSION },
+                    { label: "Platform", value: "Web (PWA)" },
                   ].map(item => (
                     <div key={item.label} style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                       <span style={{ fontSize: 14, color: MUTED, fontWeight: 600 }}>{item.label}</span>
                       <span style={{ fontSize: 14, color: TEXT, fontWeight: 700 }}>{item.value}</span>
                     </div>
                   ))}
+                  <div style={{ height: 1, background: BORDER, margin: "4px 0" }} />
+                  <div style={{ fontSize: 13, color: MUTED, fontWeight: 500, lineHeight: 1.6 }}>
+                    Imposter is een gratis party game voor groepen van 3 tot 12 spelers. Eén speler is de imposter en krijgt een andere vraag. Wie ontmaskert hem of haar?
+                  </div>
+                  <div style={{ height: 1, background: BORDER, margin: "4px 0" }} />
+                  <div style={{ fontSize: 13, fontWeight: 700, color: MUTED, letterSpacing: "0.06em", textTransform: "uppercase", marginBottom: 6 }}>Feedback geven</div>
+                  <div style={{ fontSize: 13, color: MUTED, fontWeight: 500, lineHeight: 1.6, marginBottom: 10 }}>
+                    Heb je ideeën voor nieuwe vragen, categorieën of functies? Of heb je een bug gevonden? We horen het graag via ons feedbackformulier!
+                  </div>
+                  <div style={{ position: "relative", display: "inline-block" }}>
+                    <span style={{
+                      position: "absolute", top: -7, right: 0, zIndex: 1,
+                      background: ACCENT, color: "#111",
+                      borderRadius: 100, fontSize: 9, fontWeight: 800,
+                      padding: "2px 7px", letterSpacing: "0.05em", textTransform: "uppercase",
+                      animation: "badgePop 0.3s ease",
+                    }}>Binnenkort</span>
+                    <div style={{
+                      display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
+                      background: "#1a1a1a", border: `1px solid ${BORDER}`,
+                      borderRadius: 16, padding: "12px 16px",
+                      color: "#444", fontSize: 14, fontWeight: 700,
+                      fontFamily: "'Outfit', sans-serif",
+                    }}>
+                      <span>💬</span> Feedback geven via Google Forms
+                    </div>
+                  </div>
                 </div>
               </div>
 
               {/* Juridisch */}
               <div style={{ padding: "20px 0" }}>
                 <div style={{ display: "flex", alignItems: "center", gap: 14, marginBottom: 14 }}>
-                  <span style={{ fontSize: 22, lineHeight: 1 }}>📄</span>
+                  <span style={{ fontSize: 22, lineHeight: 1, flexShrink: 0 }}>📄</span>
                   <div style={{ fontSize: 17, fontWeight: 700, color: TEXT }}>Juridisch</div>
                 </div>
                 <div style={{ paddingLeft: 36, display: "flex", flexDirection: "column" }}>
-                  {["Privacybeleid", "Gebruiksvoorwaarden"].map(item => (
-                    <div key={item} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "12px 0", borderBottom: `1px solid ${BORDER}` }}>
-                      <span style={{ fontSize: 15, color: MUTED, fontWeight: 600 }}>{item}</span>
-                      <span style={{ fontSize: 18, color: "#444" }}>›</span>
-                    </div>
+                  {[
+                    { label: "Privacybeleid", doc: "privacy" },
+                    { label: "Gebruiksvoorwaarden", doc: "terms" },
+                  ].map((item, i) => (
+                    <button
+                      key={item.label}
+                      className="btn-active"
+                      onClick={() => setLegalDoc(item.doc)}
+                      style={{
+                        display: "flex", justifyContent: "space-between", alignItems: "center",
+                        padding: "13px 0",
+                        borderTop: "none", borderLeft: "none", borderRight: "none",
+                        borderBottom: `1px solid ${BORDER}`,
+                        background: "transparent",
+                        cursor: "pointer", fontFamily: "'Outfit', sans-serif", width: "100%",
+                      }}
+                    >
+                      <span style={{ fontSize: 15, color: MUTED, fontWeight: 600 }}>{item.label}</span>
+                      <span style={{ fontSize: 18, color: "#555" }}>›</span>
+                    </button>
                   ))}
-                </div>
-                <div style={{ fontSize: 12, color: "#444", fontWeight: 600, marginTop: 12, paddingLeft: 36 }}>
-                  Meer informatie volgt in een toekomstige update.
                 </div>
               </div>
 
@@ -823,6 +940,8 @@
             </div>
           </div>
         </div>
+        {legalDoc && <LegalModal type={legalDoc} onClose={() => setLegalDoc(null)} />}
+        </React.Fragment>
       );
     };
 
@@ -1001,7 +1120,7 @@
                         display: "flex", alignItems: "center", gap: 6,
                         background: `${color}18`,
                         border: `1.5px solid ${color}55`,
-                        borderRadius: 100, padding: "8px 14px 8px 12px", fontSize: 16, fontWeight: 700, cursor: "pointer",
+                        borderRadius: 100, padding: "7px 12px", fontSize: 16, fontWeight: 700, cursor: "pointer",
                         color: color,
                       }}>
                         <span style={{
@@ -1072,48 +1191,46 @@
             </Card>
 
             {/* ── Categorieën ── */}
-            {!settings.customOnly && (
-              <Card style={{ marginBottom: 14 }}>
-                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 0 }}>
-                  <Tag>Vraagcategorieën</Tag>
-                  <div style={{ fontSize: 12, color: MUTED, fontWeight: 600, marginBottom: 12 }}>
-                    {promptPoolCount} vragen
-                  </div>
+            <Card style={{ marginBottom: 14, opacity: settings.customOnly ? 0.45 : 1, transition: "opacity 0.2s ease", pointerEvents: settings.customOnly ? "none" : "auto" }}>
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 0 }}>
+                <Tag>Vraagcategorieën</Tag>
+                <div style={{ fontSize: 12, color: MUTED, fontWeight: 600, marginBottom: 12 }}>
+                  {settings.customOnly ? "" : `${promptPoolCount} vragen`}
                 </div>
-                <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
-                  {QUESTION_CATEGORIES.map(cat => {
-                    const isSelected = selectedCategories && selectedCategories.includes(cat.id);
-                    return (
-                      <button
-                        key={cat.id}
-                        className="btn-active"
-                        onClick={() => onToggleCategory(cat.id)}
-                        style={{
-                          display: "flex", alignItems: "center", gap: 6,
-                          background: isSelected ? `${cat.color}18` : "#161616",
-                          border: `1.5px solid ${isSelected ? cat.color + "66" : BORDER}`,
-                          borderRadius: 100,
-                          padding: "7px 14px",
-                          fontSize: 16, fontWeight: 700,
-                          cursor: "pointer",
-                          color: isSelected ? cat.color : "#555",
-                          fontFamily: "'Outfit', sans-serif",
-                          transition: "all 0.18s ease",
-                        }}
-                      >
-                        <span style={{ fontSize: 15 }}>{cat.emoji}</span>
-                        {cat.name}
-                      </button>
-                    );
-                  })}
+              </div>
+              <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
+                {QUESTION_CATEGORIES.map(cat => {
+                  const isSelected = !settings.customOnly && selectedCategories && selectedCategories.includes(cat.id);
+                  return (
+                    <button
+                      key={cat.id}
+                      className="btn-active"
+                      onClick={() => onToggleCategory(cat.id)}
+                      style={{
+                        display: "flex", alignItems: "center", gap: 6,
+                        background: isSelected ? `${cat.color}18` : "#161616",
+                        border: `1.5px solid ${isSelected ? cat.color + "66" : BORDER}`,
+                        borderRadius: 100,
+                        padding: "7px 12px",
+                        fontSize: 16, fontWeight: 700,
+                        cursor: "pointer",
+                        color: isSelected ? cat.color : "#555",
+                        fontFamily: "'Outfit', sans-serif",
+                        transition: "all 0.18s ease",
+                      }}
+                    >
+                      <span style={{ fontSize: 15 }}>{cat.emoji}</span>
+                      {cat.name}
+                    </button>
+                  );
+                })}
+              </div>
+              {noCategories && !settings.customOnly && (
+                <div style={{ marginTop: 12, display: "flex", alignItems: "center", gap: 8, color: RED, fontSize: 13, fontWeight: 600 }}>
+                  <span>⚠️</span><span>Selecteer minstens één categorie om te starten.</span>
                 </div>
-                {noCategories && (
-                  <div style={{ marginTop: 12, display: "flex", alignItems: "center", gap: 8, color: RED, fontSize: 13, fontWeight: 600 }}>
-                    <span>⚠️</span><span>Selecteer minstens één categorie om te starten.</span>
-                  </div>
-                )}
-              </Card>
-            )}
+              )}
+            </Card>
             <Card style={{ marginBottom: 0 }}>
               <Tag>Spelopties</Tag>
 
@@ -1140,20 +1257,26 @@
 
             <div style={{ textAlign: "center", marginTop: 20, marginBottom: 0, lineHeight: 1.5 }}>
               <div style={{ fontSize: 12, fontWeight: 700, color: "#444", letterSpacing: "0.01em" }}>Imposter — The Party Game</div>
-              <div style={{ fontSize: 10, fontWeight: 600, color: "#333", letterSpacing: "0.05em" }}>versie {APP_VERSION} (beta)</div>
+              <div style={{ fontSize: 10, fontWeight: 600, color: "#333", letterSpacing: "0.05em" }}>versie {APP_VERSION}</div>
             </div>
 
           </div>
 
           <div style={S.footer}>
             {questionError && (
-              <div style={{
-                background: "#2a1010", border: `1px solid #6a1a1a`,
-                borderRadius: 20, padding: "14px 18px", marginBottom: 12,
-                display: "flex", alignItems: "center", gap: 12,
-              }}>
+              <div
+                onClick={settings.customOnly ? onOpenPrompts : undefined}
+                style={{
+                  background: "#2a1010", border: `1px solid #6a1a1a`,
+                  borderRadius: 20, padding: "14px 18px", marginBottom: 12,
+                  display: "flex", alignItems: "center", gap: 12,
+                  cursor: settings.customOnly ? "pointer" : "default",
+                }}
+              >
                 <span style={{ fontSize: 20 }}>⚠️</span>
-                <div style={{ fontSize: 15, fontWeight: 600, color: "#e07070", lineHeight: 1.4 }}>{questionError}</div>
+                <div style={{ fontSize: 15, fontWeight: 600, color: "#e07070", lineHeight: 1.4 }}>
+                  {questionError}
+                </div>
               </div>
             )}
             <BigBtn
@@ -1746,11 +1869,15 @@
       const [selectedCategories, setSelectedCategories] = useState(() => {
         try {
           const saved = JSON.parse(localStorage.getItem("imposter_selected_categories"));
-          return saved || QUESTION_CATEGORIES.map(c => c.id);
+          return saved || ["klassiek"];
         } catch {
-          return QUESTION_CATEGORIES.map(c => c.id);
+          return ["klassiek"];
         }
       });
+
+      // Onthoud welke categorieën geselecteerd waren vóór "enkel eigen vragen" werd ingeschakeld
+      const savedCategoriesRef = useRef(null);
+      const isMountedRef = useRef(false);
 
       // promptPool is computed (niet meer als state)
       const promptPool = useMemo(() => {
@@ -1796,8 +1923,8 @@
         ? "Selecteer minstens één vraagcategorie om het spel te starten."
         : notEnoughQuestions
           ? (settings.customOnly
-              ? "'Enkel eigen vragen' is actief. Voeg minstens 2 vragen toe via 'Eigen vragen' om een spel te starten."
-              : "Niet genoeg vragen om te starten. Kies minstens 1 categorie.")
+              ? "'Enkel eigen vragen' is actief. Voeg zelf minstens 2 vragen toe."
+              : "Niet genoeg vragen om te starten. Kies minstens 1 vraagcategorie.")
           : questionError;
 
       const countdownRef = useRef(null);
@@ -1834,7 +1961,22 @@
       useEffect(() => {
         try { localStorage.setItem("imposter_settings", JSON.stringify(settings)); } catch {}
         setQuestionError("");
-        setAvailablePrompts(settings.customOnly ? [...customQuestions] : [...promptPool]);
+        if (!isMountedRef.current) {
+          isMountedRef.current = true;
+          return; // sla de eerste mount over zodat localStorage-selectie bewaard blijft
+        }
+        if (settings.customOnly) {
+          // Sla huidige categorieën op en deselecteer ze allemaal
+          savedCategoriesRef.current = selectedCategories;
+          setSelectedCategories([]);
+          setAvailablePrompts([...customQuestions]);
+        } else {
+          // Herstel de vorige categorieselectie (of standaard "klassiek")
+          const restored = savedCategoriesRef.current || ["klassiek"];
+          savedCategoriesRef.current = null;
+          setSelectedCategories(restored);
+          // promptPool update happens via selectedCategories effect
+        }
       }, [settings.customOnly]);
 
       useEffect(() => {
