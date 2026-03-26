@@ -48,6 +48,7 @@
           "Wie zou het meest waarschijnlijk meedoen aan De Mol?",
           "Wie zou het meest waarschijnlijk uit een reality show worden gegooid in de eerste aflevering?",
           "Wie zou het meest waarschijnlijk ontslag nemen zonder al een nieuwe job te hebben?",
+          "Wie zou het meest waarschijnlijk vergeten waar hij/zij de auto heeft geparkeerd?",
           "Wie zou het meest waarschijnlijk een eigen bedrijf starten?",
           "Wie zou het meest waarschijnlijk een boek schrijven?",
           "Wie zou het meest waarschijnlijk een impulsieve tattoo laten zetten?",
@@ -57,6 +58,11 @@
           "Wie zou het meest waarschijnlijk een weredrecord breken?",
           "Wie zou het meest waarschijnlijk wenen tijdens een triestige film?",
           "Wie zou het meest waarschijnlijk tegen een andere auto rijden tijdens het parkeren?",
+          "Wie zou het meest waarschijnlijk een TikTok maken die viraal gaat?",
+          "Wie zou het meest waarschijnlijk een marathon lopen?",
+          "Wie zou het meest waarschijnlijk in slaap vallen tijdens een film?",
+          "Wie zou het meest waarschijnlijk een dieet 1 dag volhouden?",
+          "Wie zou het meest waarschijnlijk een job doen die totaal niet bij hem/haar past?",
           "Wie zou het meest waarschijnlijk een eetwedstrijd winnen?",
         ]
       },
@@ -86,6 +92,11 @@
           "Wie zou het meest waarschijnlijk boos worden als iemand zijn eten aanraakt?",
           "Wie zou het meest waarschijnlijk zijn loon uitgeven op de eerste dag?",
           "Wie zou het meest waarschijnlijk elke avond takeaway bestellen?",
+          "Wie zou het meest waarschijnlijk een bericht lezen en vergeten te antwoorden?",
+          "Wie zou het meest waarschijnlijk een app downloaden en die nooit gebruiken?",
+          "Wie zou het meest waarschijnlijk iets bestellen en daarna reviews beginnen lezen?",
+          "Wie zou het meest waarschijnlijk 10 alarms zetten en toch te laat opstaan?",
+          "Wie zou het meest waarschijnlijk zichzelf motiveren met 'morgen begin ik echt'?",
           "Wie zou het meest waarschijnlijk advies vragen maar er niet naar luisteren?",
         ]
       },
@@ -118,6 +129,15 @@
           "Wie zou het meest waarschijnlijk een foot fetish hebben?",
           "Wie zou het meest waarschijnlijk een sekstape maken?",
           "Wie zou het meest waarschijnlijk trouwen voor geld?",
+          "Wie zou het meest waarschijnlijk een sugar daddy/mommy hebben?",
+          "Wie zou het meest waarschijnlijk een relatie hebben met iemand van het werk?",
+          "Wie zou het meest waarschijnlijk een ex stalken op social media?",
+          "Wie zou het meest waarschijnlijk iemand versieren puur voor gratis drank?",
+          "Wie zou het meest waarschijnlijk liegen over zijn/haar body count?",
+          "Wie zou het meest waarschijnlijk blijven hangen in een toxic relatie?",
+          "Wie zou het meest waarschijnlijk alles op het spel zetten voor één nacht plezier?",
+          "Wie zou het meest waarschijnlijk iemand ghosten zonder uitleg?",
+          "Wie zou het meest waarschijnlijk drama veroorzaken op een feestje?",
           "Wie zou het meest waarschijnlijk de mile-high club joinen?",
         ]
       },
@@ -148,6 +168,12 @@
           "Wie zou het meest waarschijnlijk 3 avonden op een rij uitgaan?",
           "Wie zou het meest waarschijnlijk een week lang niet douchen?",
           "Wie zou het meest waarschijnlijk zichzelf belachelijk maken in het openbaar?",
+          "Wie zou het meest waarschijnlijk zich ongemakkelijk voelen in stilte en random beginnen praten?",
+          "Wie zou het meest waarschijnlijk doen alsof hij/zij druk is om plannen te vermijden?",
+          "Wie zou het meest waarschijnlijk overdenken wat hij/zij 3 dagen geleden gezegd heeft?",
+          "Wie zou het meest waarschijnlijk zeggen 'het is oké' terwijl het duidelijk niet oké is?",
+          "Wie zou het meest waarschijnlijk zich anders gedragen afhankelijk van met wie hij/zij is?",
+          "Wie zou het meest waarschijnlijk doen alsof hij/zij iemand niet ziet om geen small talk te doen?",
           "Wie zou het meest waarschijnlijk te zat worden op een feestje van het werk?",
         ]
       },
@@ -386,7 +412,7 @@
           }}>
             <div style={{ flexShrink: 0 }}>
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 32 }}>
-                <h2 style={{ fontSize: 24, fontWeight: 800, color: TEXT, letterSpacing: "-0.02em" }}>Prompts beheren</h2>
+                <h2 style={{ fontSize: "clamp(20px, 6.4vw, 24px)", fontWeight: 800, color: TEXT, letterSpacing: "-0.02em" }}>Prompts beheren</h2>
                 <button
                   onClick={onClose}
                   className="btn-active"
@@ -400,7 +426,7 @@
                     display: "flex",
                     alignItems: "center",
                     justifyContent: "center",
-                    fontSize: 24,
+                    fontSize: "clamp(20px, 6.4vw, 24px)",
                     fontWeight: 400,
                     cursor: "pointer"
                   }}
@@ -410,7 +436,7 @@
               <div style={{ marginBottom: 28 }}>
                 <Tag color={ACCENT}>Voeg een vraag toe</Tag>
                 <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-                  <div style={{ fontSize: 16, color: TEXT, fontWeight: 600 }}>Wie zou het meest waarschijnlijk</div>
+                  <div style={{ fontSize: "clamp(14px, 4.3vw, 16px)", color: TEXT, fontWeight: 600 }}>Wie zou het meest waarschijnlijk</div>
                   <div style={{ display: "flex", gap: 10 }}>
                     <input
                       className="input-focus"
@@ -432,7 +458,7 @@
                         padding: 14,
                         color: TEXT,
                         fontFamily: "inherit",
-                        fontSize: 16,
+                        fontSize: "clamp(14px, 4.3vw, 16px)",
                         minWidth: 0
                       }}
                     />
@@ -447,7 +473,7 @@
                         borderRadius: 12,
                         padding: "0 20px",
                         fontWeight: 700,
-                        fontSize: 24,
+                        fontSize: "clamp(20px, 6.4vw, 24px)",
                         cursor: qText.trim() === "" ? "default" : "pointer",
                         opacity: qText.trim() === "" ? 0.3 : 1,
                         filter: qText.trim() === "" ? "grayscale(0.5)" : "none",
@@ -479,12 +505,12 @@
 
             <div style={{ flex: 1, overflowY: "auto" }}>
               {customQuestions.length === 0 ? (
-                <div style={{ color: MUTED, fontSize: 16, textAlign: "center", marginTop: 20 }}>Nog geen eigen vragen toegevoegd.</div>
+                <div style={{ color: MUTED, fontSize: "clamp(14px, 4.3vw, 16px)", textAlign: "center", marginTop: 20 }}>Nog geen eigen vragen toegevoegd.</div>
               ) : (
                 customQuestions.slice().reverse().map((q, idx) => (
                   <div key={idx} style={{ padding: "16px 0", borderBottom: `1px solid ${BORDER}`, display: "flex", justifyContent: "space-between", alignItems: "center", gap: 12 }}>
-                    <div style={{ color: TEXT, fontSize: 16, fontWeight: 500, lineHeight: 1.4, flex: 1 }}>{q}</div>
-                    <button onClick={() => onDelete(q)} className="btn-active" style={{ background: RED, color: "#fff", border: "none", borderRadius: "50%", width: 32, height: 32, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 18, fontWeight: 800, cursor: "pointer", flexShrink: 0 }}>
+                    <div style={{ color: TEXT, fontSize: "clamp(14px, 4.3vw, 16px)", fontWeight: 500, lineHeight: 1.4, flex: 1 }}>{q}</div>
+                    <button onClick={() => onDelete(q)} className="btn-active" style={{ background: RED, color: "#fff", border: "none", borderRadius: "50%", width: 32, height: 32, display: "flex", alignItems: "center", justifyContent: "center", fontSize: "clamp(16px, 4.8vw, 18px)", fontWeight: 800, cursor: "pointer", flexShrink: 0 }}>
                       ×
                     </button>
                   </div>
@@ -537,7 +563,7 @@
             padding: "24px 24px calc(24px + env(safe-area-inset-bottom))"
           }}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 32 }}>
-              <h2 style={{ fontSize: 24, fontWeight: 800, color: TEXT, letterSpacing: "-0.02em", margin: 0 }}>Hoe werkt het spel?</h2>
+              <h2 style={{ fontSize: "clamp(20px, 6.4vw, 24px)", fontWeight: 800, color: TEXT, letterSpacing: "-0.02em", margin: 0 }}>Hoe werkt het spel?</h2>
               <button
                 onClick={onClose}
                 className="btn-active"
@@ -551,7 +577,7 @@
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "center",
-                  fontSize: 24,
+                  fontSize: "clamp(20px, 6.4vw, 24px)",
                   fontWeight: 400,
                   cursor: "pointer",
                   flexShrink: 0,
@@ -577,7 +603,7 @@
                       display: "flex",
                       alignItems: "center",
                       justifyContent: "center",
-                      fontSize: 18,
+                      fontSize: "clamp(16px, 4.8vw, 18px)",
                       flexShrink: 0,
                     }}>{step.emoji}</div>
                     {i < steps.length - 1 && (
@@ -585,15 +611,15 @@
                     )}
                   </div>
                   <div style={{ paddingTop: 6 }}>
-                    <div style={{ fontSize: 17, fontWeight: 700, color: TEXT, marginBottom: 4 }}>{step.label}</div>
-                    <div style={{ fontSize: 15, color: MUTED, lineHeight: 1.55, fontWeight: 500 }}>{step.text}</div>
+                    <div style={{ fontSize: "clamp(15px, 4.5vw, 17px)", fontWeight: 700, color: TEXT, marginBottom: 4 }}>{step.label}</div>
+                    <div style={{ fontSize: "clamp(13px, 4vw, 15px)", color: MUTED, lineHeight: 1.55, fontWeight: 500 }}>{step.text}</div>
                   </div>
                 </div>
               ))}
 
               <div style={{ paddingTop: 24, borderTop: `1px solid ${BORDER}`, marginBottom: 20 }}>
                 <div style={{ fontSize: 14, color: "#555", fontWeight: 700, letterSpacing: "0.06em", textTransform: "uppercase", marginBottom: 8 }}>Punten</div>
-                <div style={{ fontSize: 15, color: MUTED, lineHeight: 1.6, fontWeight: 500 }}>
+                <div style={{ fontSize: "clamp(13px, 4vw, 15px)", color: MUTED, lineHeight: 1.6, fontWeight: 500 }}>
                   Imposter gevonden → je wint <strong style={{color: TEXT}}>1 punt</strong>.<br/>
                   Niet gevonden → de imposter wint <strong style={{color: TEXT}}>2 punten</strong>.
                 </div>
@@ -649,15 +675,15 @@
           <div style={{ width: "100%", maxWidth: "500px", height: "100%", display: "flex", flexDirection: "column", padding: "24px 24px calc(24px + env(safe-area-inset-bottom))" }}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 28 }}>
               <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-                <span style={{ fontSize: 22 }}>{emoji}</span>
-                <h2 style={{ fontSize: 22, fontWeight: 800, color: TEXT, letterSpacing: "-0.02em", margin: 0 }}>{title}</h2>
+                <span style={{ fontSize: "clamp(18px, 5.9vw, 22px)" }}>{emoji}</span>
+                <h2 style={{ fontSize: "clamp(18px, 5.9vw, 22px)", fontWeight: 800, color: TEXT, letterSpacing: "-0.02em", margin: 0 }}>{title}</h2>
               </div>
-              <button onClick={onClose} className="btn-active" style={{ background: "rgba(255,255,255,0.1)", border: "none", color: TEXT, width: 40, height: 40, borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 24, cursor: "pointer", flexShrink: 0 }}>×</button>
+              <button onClick={onClose} className="btn-active" style={{ background: "rgba(255,255,255,0.1)", border: "none", color: TEXT, width: 40, height: 40, borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "clamp(20px, 6.4vw, 24px)", cursor: "pointer", flexShrink: 0 }}>×</button>
             </div>
             <div style={{ flex: 1, overflowY: "auto", display: "flex", flexDirection: "column", gap: 0 }}>
               {content.map((section, i) => (
                 <div key={i} style={{ padding: "16px 0", borderBottom: i < content.length - 1 ? `1px solid ${BORDER}` : "none" }}>
-                  <div style={{ fontSize: 15, fontWeight: 700, color: TEXT, marginBottom: 6 }}>{section.heading}</div>
+                  <div style={{ fontSize: "clamp(13px, 4vw, 15px)", fontWeight: 700, color: TEXT, marginBottom: 6 }}>{section.heading}</div>
                   <div style={{ fontSize: 14, color: MUTED, fontWeight: 500, lineHeight: 1.65 }}>{section.body}</div>
                 </div>
               ))}
@@ -715,13 +741,13 @@
             background: value <= min ? "#222" : "#2a2a2a",
             border: `1px solid ${BORDER}`,
             color: value <= min ? "#444" : TEXT,
-            fontSize: 20, fontWeight: 700,
+            fontSize: "clamp(17px, 5.3vw, 20px)", fontWeight: 700,
             cursor: value <= min ? "not-allowed" : "pointer",
             display: "flex", alignItems: "center", justifyContent: "center",
             flexShrink: 0,
           }}
         >−</button>
-        <div style={{ fontSize: 18, fontWeight: 800, color: ACCENT, minWidth: 60, textAlign: "center" }}>
+        <div style={{ fontSize: "clamp(16px, 4.8vw, 18px)", fontWeight: 800, color: ACCENT, minWidth: 60, textAlign: "center" }}>
           {format(value)}
         </div>
         <button
@@ -733,7 +759,7 @@
             background: value >= max ? "#222" : "#2a2a2a",
             border: `1px solid ${BORDER}`,
             color: value >= max ? "#444" : TEXT,
-            fontSize: 20, fontWeight: 700,
+            fontSize: "clamp(17px, 5.3vw, 20px)", fontWeight: 700,
             cursor: value >= max ? "not-allowed" : "pointer",
             display: "flex", alignItems: "center", justifyContent: "center",
             flexShrink: 0,
@@ -779,7 +805,7 @@
             padding: "24px 24px calc(24px + env(safe-area-inset-bottom))"
           }}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 32 }}>
-              <h2 style={{ fontSize: 24, fontWeight: 800, color: TEXT, letterSpacing: "-0.02em", margin: 0 }}>Instellingen</h2>
+              <h2 style={{ fontSize: "clamp(20px, 6.4vw, 24px)", fontWeight: 800, color: TEXT, letterSpacing: "-0.02em", margin: 0 }}>Instellingen</h2>
               <button
                 onClick={onClose}
                 className="btn-active"
@@ -793,7 +819,7 @@
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "center",
-                  fontSize: 24,
+                  fontSize: "clamp(20px, 6.4vw, 24px)",
                   fontWeight: 400,
                   cursor: "pointer",
                   flexShrink: 0,
@@ -806,8 +832,8 @@
               {/* Taal */}
               <div style={{ paddingBottom: 24, marginBottom: 4, borderBottom: `1px solid ${BORDER}` }}>
                 <div style={{ display: "flex", alignItems: "center", gap: 14, marginBottom: 16 }}>
-                  <span style={{ fontSize: 22, lineHeight: 1, flexShrink: 0 }}>🌐</span>
-                  <div style={{ fontSize: 17, fontWeight: 700, color: TEXT }}>Taal</div>
+                  <span style={{ fontSize: "clamp(17px, 5.3vw, 20px)", flexShrink: 0, lineHeight: "1.4", display: "inline-flex", alignItems: "center", justifyContent: "center", width: 26, height: 26 }}>🌐</span>
+                  <div style={{ fontSize: "clamp(15px, 4.5vw, 17px)", fontWeight: 700, color: TEXT }}>Taal</div>
                 </div>
                 <div style={{ fontSize: 14, color: MUTED, fontWeight: 500, paddingLeft: 36, marginBottom: 14 }}>Kies de taal van de app.</div>
                 <div style={{ display: "flex", gap: 8, paddingLeft: 36 }}>
@@ -858,8 +884,8 @@
               {/* Over de app */}
               <div style={{ padding: "20px 0", borderBottom: `1px solid ${BORDER}` }}>
                 <div style={{ display: "flex", alignItems: "center", gap: 14, marginBottom: 16 }}>
-                  <span style={{ fontSize: 22, lineHeight: 1, flexShrink: 0 }}>📱</span>
-                  <div style={{ fontSize: 17, fontWeight: 700, color: TEXT }}>Over de app</div>
+                  <span style={{ fontSize: "clamp(17px, 5.3vw, 20px)", flexShrink: 0, lineHeight: "1.4", display: "inline-flex", alignItems: "center", justifyContent: "center", width: 26, height: 26 }}>📱</span>
+                  <div style={{ fontSize: "clamp(15px, 4.5vw, 17px)", fontWeight: 700, color: TEXT }}>Over de app</div>
                 </div>
                 <div style={{ paddingLeft: 36, display: "flex", flexDirection: "column", gap: 12 }}>
                   {[
@@ -905,8 +931,8 @@
               {/* Juridisch */}
               <div style={{ padding: "20px 0" }}>
                 <div style={{ display: "flex", alignItems: "center", gap: 14, marginBottom: 14 }}>
-                  <span style={{ fontSize: 22, lineHeight: 1, flexShrink: 0 }}>📄</span>
-                  <div style={{ fontSize: 17, fontWeight: 700, color: TEXT }}>Juridisch</div>
+                  <span style={{ fontSize: "clamp(17px, 5.3vw, 20px)", flexShrink: 0, lineHeight: "1.4", display: "inline-flex", alignItems: "center", justifyContent: "center", width: 26, height: 26 }}>📄</span>
+                  <div style={{ fontSize: "clamp(15px, 4.5vw, 17px)", fontWeight: 700, color: TEXT }}>Juridisch</div>
                 </div>
                 <div style={{ paddingLeft: 36, display: "flex", flexDirection: "column" }}>
                   {[
@@ -926,8 +952,8 @@
                         cursor: "pointer", fontFamily: "'Outfit', sans-serif", width: "100%",
                       }}
                     >
-                      <span style={{ fontSize: 15, color: MUTED, fontWeight: 600 }}>{item.label}</span>
-                      <span style={{ fontSize: 18, color: "#555" }}>›</span>
+                      <span style={{ fontSize: "clamp(13px, 4vw, 15px)", color: MUTED, fontWeight: 600 }}>{item.label}</span>
+                      <span style={{ fontSize: "clamp(16px, 4.8vw, 18px)", color: "#555" }}>›</span>
                     </button>
                   ))}
                 </div>
@@ -970,9 +996,9 @@
         }}>
           <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 12 }}>
             <div style={{ display: "flex", alignItems: "flex-start", gap: 14, flex: 1 }}>
-              <span style={{ fontSize: 22, flexShrink: 0, lineHeight: 1, marginTop: 2 }}>{emoji}</span>
+              <span style={{ fontSize: "clamp(17px, 5.3vw, 20px)", flexShrink: 0, lineHeight: "1.4", marginTop: 2, display: "inline-flex", alignItems: "center", justifyContent: "center", width: 26, height: 26 }}>{emoji}</span>
               <div style={{ flex: 1 }}>
-                <div style={{ fontSize: 16, fontWeight: 700, color: TEXT, lineHeight: 1.4 }}>{label}</div>
+                <div style={{ fontSize: "clamp(14px, 4.3vw, 16px)", fontWeight: 700, color: TEXT, lineHeight: 1.4 }}>{label}</div>
                 {showSubtitle && subtitle && (
                   <div key={animKey} style={{
                     fontSize: 12, color: MUTED, fontWeight: 500, lineHeight: 1.4,
@@ -1044,7 +1070,7 @@
                 </span>
                 <span>STER</span>
               </div>
-              <div style={{ fontSize: 16, color: MUTED, marginTop: 10, fontWeight: 500 }}>
+              <div style={{ fontSize: "clamp(14px, 4.3vw, 16px)", color: MUTED, marginTop: 10, fontWeight: 500 }}>
                 Who's most likely to...
               </div>
             </div>
@@ -1063,7 +1089,7 @@
                   cursor: "pointer", fontFamily: "'Outfit', sans-serif",
                 }}
               >
-                <span style={{ fontSize: 20 }}>📖</span>
+                <span style={{ fontSize: "clamp(17px, 5.3vw, 20px)" }}>📖</span>
                 <span style={{ fontSize: 11, fontWeight: 700, color: TEXT, lineHeight: 1.2, textAlign: "center", whiteSpace: "nowrap" }}>Spelregels</span>
               </button>
               <button
@@ -1088,7 +1114,7 @@
                     animation: "badgePop 0.3s ease",
                   }}>Actief</span>
                 )}
-                <span style={{ fontSize: 20 }}>✏️</span>
+                <span style={{ fontSize: "clamp(17px, 5.3vw, 20px)" }}>✏️</span>
                 <span style={{ fontSize: 11, fontWeight: 700, color: TEXT, lineHeight: 1.2, textAlign: "center", whiteSpace: "nowrap" }}>Eigen vragen</span>
               </button>
               <button
@@ -1103,7 +1129,7 @@
                   cursor: "pointer", fontFamily: "'Outfit', sans-serif",
                 }}
               >
-                <span style={{ fontSize: 20 }}>⚙️</span>
+                <span style={{ fontSize: "clamp(17px, 5.3vw, 20px)" }}>⚙️</span>
                 <span style={{ fontSize: 11, fontWeight: 700, color: TEXT, lineHeight: 1.2, textAlign: "center", whiteSpace: "nowrap" }}>Instellingen</span>
               </button>
             </div>
@@ -1120,7 +1146,7 @@
                         display: "flex", alignItems: "center", gap: 6,
                         background: `${color}18`,
                         border: `1.5px solid ${color}55`,
-                        borderRadius: 100, padding: "7px 12px", fontSize: 16, fontWeight: 700, cursor: "pointer",
+                        borderRadius: 100, padding: "7px 12px", fontSize: "clamp(14px, 4.3vw, 16px)", fontWeight: 700, cursor: "pointer",
                         color: color,
                       }}>
                         <span style={{
@@ -1156,7 +1182,7 @@
                     borderRadius: 12,
                     padding: "13px",
                     color: players.length >= MAX_PLAYERS ? "#444" : TEXT,
-                    fontSize: 17,
+                    fontSize: "clamp(15px, 4.5vw, 17px)",
                     minWidth: 0,
                     fontWeight: 600,
                     fontFamily: "'Outfit', sans-serif",
@@ -1169,7 +1195,7 @@
                   disabled={newPlayer.trim() === "" || players.length >= MAX_PLAYERS}
                   style={{
                     background: ACCENT, color: "#111", border: "none",
-                    borderRadius: 12, padding: "0 18px", fontSize: 26, fontWeight: 700,
+                    borderRadius: 12, padding: "0 18px", fontSize: "clamp(21px, 6.9vw, 26px)", fontWeight: 700,
                     cursor: newPlayer.trim() === "" || players.length >= MAX_PLAYERS ? "not-allowed" : "pointer",
                     flexShrink: 0,
                     opacity: newPlayer.trim() === "" || players.length >= MAX_PLAYERS ? 0.3 : 1,
@@ -1212,14 +1238,14 @@
                         border: `1.5px solid ${isSelected ? cat.color + "66" : BORDER}`,
                         borderRadius: 100,
                         padding: "7px 12px",
-                        fontSize: 16, fontWeight: 700,
+                        fontSize: "clamp(14px, 4.3vw, 16px)", fontWeight: 700,
                         cursor: "pointer",
                         color: isSelected ? cat.color : "#555",
                         fontFamily: "'Outfit', sans-serif",
                         transition: "all 0.18s ease",
                       }}
                     >
-                      <span style={{ fontSize: 15 }}>{cat.emoji}</span>
+                      <span style={{ fontSize: "clamp(13px, 4vw, 15px)" }}>{cat.emoji}</span>
                       {cat.name}
                     </button>
                   );
@@ -1273,8 +1299,8 @@
                   cursor: settings.customOnly ? "pointer" : "default",
                 }}
               >
-                <span style={{ fontSize: 20 }}>⚠️</span>
-                <div style={{ fontSize: 15, fontWeight: 600, color: "#e07070", lineHeight: 1.4 }}>
+                <span style={{ fontSize: "clamp(17px, 5.3vw, 20px)" }}>⚠️</span>
+                <div style={{ fontSize: "clamp(13px, 4vw, 15px)", fontWeight: 600, color: "#e07070", lineHeight: 1.4 }}>
                   {questionError}
                 </div>
               </div>
@@ -1299,7 +1325,7 @@
             <div style={{ fontSize: 14, color: MUTED, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: 50 }}>
               Ronde {round} &nbsp;·&nbsp; {current}/{total}
             </div>
-            <div style={{ fontSize: 80, marginBottom: 30 }}>👀</div>
+            <div style={{ fontSize: "clamp(52px, 21.3vw, 80px)", marginBottom: 30 }}>👀</div>
             <div style={{ fontSize: "clamp(32px, 10.7vw, 40px)", fontWeight: 800, marginBottom: 16, letterSpacing: "-0.02em" }}>
               Hey <span style={{ color: playerColor || ACCENT }}>{player}</span>
             </div>
@@ -1353,12 +1379,12 @@
         <style>{css}</style>
         <div style={S.inner}>
           <div style={{ ...S.contentCenter, textAlign: "center" }}>
-            <div style={{ fontSize: 80, marginBottom: 30 }}>✍️</div>
+            <div style={{ fontSize: "clamp(52px, 21.3vw, 80px)", marginBottom: 30 }}>✍️</div>
             <div style={{ fontSize: "clamp(28px, 9.6vw, 36px)", fontWeight: 800, marginBottom: 20, letterSpacing: "-0.02em" }}>Schrijf een naam op</div>
             <div style={{ fontSize: "clamp(17px, 5.4vw, 20px)", color: MUTED, marginBottom: 16, lineHeight: 1.6, fontWeight: 500 }}>
               Schrijf discreet op wie volgens jou bij jouw vraag past.
             </div>
-            <div style={{ fontSize: 16, color: "#666", fontWeight: 500 }}>
+            <div style={{ fontSize: "clamp(14px, 4.3vw, 16px)", color: "#666", fontWeight: 500 }}>
               Nog niet tonen!
             </div>
           </div>
@@ -1413,7 +1439,7 @@
         <div style={S.page}>
           <style>{css}</style>
           <div style={{ ...S.inner, justifyContent: "center", alignItems: "center", textAlign: "center" }}>
-            <div style={{ fontSize: 18, color: MUTED, fontWeight: 800, letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: 40 }}>
+            <div style={{ fontSize: "clamp(16px, 4.8vw, 18px)", color: MUTED, fontWeight: 800, letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: 40 }}>
               {countdown > 0 ? "Klaar om te tonen?" : "Toon je naam!"}
             </div>
             <div
@@ -1474,7 +1500,7 @@
           <div style={S.inner}>
             <div style={S.contentCenter}>
               <div style={{ textAlign: "center", marginBottom: 30 }}>
-                <div style={{ fontSize: 80, marginBottom: 20 }}>👀</div>
+                <div style={{ fontSize: "clamp(52px, 21.3vw, 80px)", marginBottom: 20 }}>👀</div>
                 <div style={{ fontSize: "clamp(28px, 9.6vw, 36px)", fontWeight: 800, marginBottom: 20, letterSpacing: "-0.02em" }}>Namen tonen!</div>
               </div>
               <div style={{ fontSize: "clamp(17px, 5.4vw, 20px)", color: MUTED, lineHeight: 1.6, fontWeight: 500, textAlign: "center" }}>
@@ -1499,7 +1525,7 @@
                   <div style={{ fontSize: 13, fontWeight: 800, letterSpacing: "0.12em", textTransform: "uppercase", color: MUTED, marginBottom: 6 }}>
                     Timer start over
                   </div>
-                  <div style={{ fontSize: 36, fontWeight: 800, color: MUTED, letterSpacing: "-0.03em", lineHeight: 1 }}>
+                  <div style={{ fontSize: "clamp(28px, 9.6vw, 36px)", fontWeight: 800, color: MUTED, letterSpacing: "-0.03em", lineHeight: 1 }}>
                     {readingLeft}
                   </div>
                 </div>
@@ -1507,13 +1533,13 @@
                 <div>
                   <div style={{ display: "flex", alignItems: "baseline", justifyContent: "center", gap: 8, marginBottom: 10 }}>
                     <div style={{
-                      fontSize: 44, fontWeight: 800, letterSpacing: "-0.03em",
+                      fontSize: "clamp(34px, 11.7vw, 44px)", fontWeight: 800, letterSpacing: "-0.03em",
                       color: timerDone ? RED : timerColor,
                       transition: "color 0.4s ease", lineHeight: 1,
                     }}>
                       {timerDone ? "⏰" : timeLeft}
                     </div>
-                    {!timerDone && <div style={{ fontSize: 15, color: MUTED, fontWeight: 600 }}>sec</div>}
+                    {!timerDone && <div style={{ fontSize: "clamp(13px, 4vw, 15px)", color: MUTED, fontWeight: 600 }}>sec</div>}
                   </div>
                   <div style={{ background: "#222", borderRadius: 100, height: 8, overflow: "hidden" }}>
                     <div style={{
@@ -1577,10 +1603,10 @@
 
             <Card style={{ padding: "28px 24px" }}>
               <Tag>Gewone vraag</Tag>
-              <div style={{ fontSize: 18, lineHeight: 1.5, marginBottom: 20, fontWeight: 600 }}>{normalQ}</div>
+              <div style={{ fontSize: "clamp(16px, 4.8vw, 18px)", lineHeight: 1.5, marginBottom: 20, fontWeight: 600 }}>{normalQ}</div>
               <Divider />
               <Tag color={RED}>Imposter vraag</Tag>
-              <div style={{ fontSize: 18, lineHeight: 1.5, color: MUTED, fontWeight: 500 }}>{imposterQ}</div>
+              <div style={{ fontSize: "clamp(16px, 4.8vw, 18px)", lineHeight: 1.5, color: MUTED, fontWeight: 500 }}>{imposterQ}</div>
             </Card>
           </div>
           <div style={{ ...S.footer, display: "flex", flexDirection: "column", gap: 16 }}>
@@ -1727,7 +1753,7 @@
             {winner && (
               <div style={{ textAlign: "center", marginBottom: 24, position: "relative", overflow: "visible" }}>
                 <ConfettiBlast />
-                <div style={{ fontSize: 52, marginBottom: 10 }}>🏆</div>
+                <div style={{ fontSize: "clamp(38px, 13.9vw, 52px)", marginBottom: 10 }}>🏆</div>
                 <div style={{
                   fontSize: "clamp(22px, 7vw, 26px)", fontWeight: 800, color: GREEN, marginBottom: 4,
                   animation: "winnerPulse 1.8s ease-in-out infinite",
@@ -1755,7 +1781,7 @@
                   <div key={name}>
                     {i > 0 && <div style={{ height: 2, background: BORDER, margin: "16px 0", borderRadius: 2 }} />}
                     <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
-                      <span style={{ fontSize: 28, width: 36, textAlign: "center" }}>{medals[i] || <span style={{fontSize: 18, color: MUTED, fontWeight: 800}}>{i+1}</span>}</span>
+                      <span style={{ fontSize: "clamp(22px, 7.5vw, 28px)", width: 36, textAlign: "center" }}>{medals[i] || <span style={{fontSize: "clamp(16px, 4.8vw, 18px)", color: MUTED, fontWeight: 800}}>{i+1}</span>}</span>
                       <div style={{ flex: 1 }}>
                         <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 8 }}>
                           <div style={{
@@ -1788,7 +1814,7 @@
               <div style={{ display: "flex", flexDirection: "column", gap: 6, marginTop: 14 }}>
                 {topGuessers.length > 0 && (
                   <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                    <span style={{ fontSize: 16, width: 22, textAlign: "center", flexShrink: 0 }}>🔍</span>
+                    <span style={{ fontSize: "clamp(14px, 4.3vw, 16px)", width: 22, textAlign: "center", flexShrink: 0 }}>🔍</span>
                     <span style={{ fontSize: 14, color: MUTED, fontWeight: 600, flexShrink: 0 }}>Beste speurder(s) —</span>
                     <span style={{ fontSize: 14, fontWeight: 800, minWidth: 0 }}>
                       {topGuessers.map((n, i) => (
@@ -1802,7 +1828,7 @@
                 )}
                 {topImposters.length > 0 && (
                   <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                    <span style={{ fontSize: 16, width: 22, textAlign: "center", flexShrink: 0 }}>😈</span>
+                    <span style={{ fontSize: "clamp(14px, 4.3vw, 16px)", width: 22, textAlign: "center", flexShrink: 0 }}>😈</span>
                     <span style={{ fontSize: 14, color: MUTED, fontWeight: 600, flexShrink: 0 }}>Meeste keer imposter —</span>
                     <span style={{ fontSize: 14, fontWeight: 800, minWidth: 0 }}>
                       {topImposters.map((n, i) => (
@@ -1816,7 +1842,7 @@
                 )}
                 {neverCaught.length > 0 && (
                   <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                    <span style={{ fontSize: 16, width: 22, textAlign: "center", flexShrink: 0 }}>🎯</span>
+                    <span style={{ fontSize: "clamp(14px, 4.3vw, 16px)", width: 22, textAlign: "center", flexShrink: 0 }}>🎯</span>
                     <span style={{ fontSize: 14, color: MUTED, fontWeight: 600, flexShrink: 0 }}>Nooit gepakt —</span>
                     <span style={{ fontSize: 14, fontWeight: 800, minWidth: 0 }}>
                       {neverCaught.map((n, i) => (
@@ -2165,7 +2191,7 @@
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
-                fontSize: 24,
+                fontSize: "clamp(20px, 6.4vw, 24px)",
                 fontWeight: 400,
                 cursor: "pointer",
                 flexShrink: 0,
@@ -2189,11 +2215,11 @@
                 borderRadius: 20, padding: "32px 28px",
                 maxWidth: 360, width: "100%", textAlign: "center",
               }}>
-                <div style={{ fontSize: 48, marginBottom: 16 }}>🚪</div>
-                <div style={{ fontSize: 22, fontWeight: 800, color: TEXT, marginBottom: 10, letterSpacing: "-0.02em" }}>
+                <div style={{ fontSize: "clamp(36px, 12.8vw, 48px)", marginBottom: 16 }}>🚪</div>
+                <div style={{ fontSize: "clamp(18px, 5.9vw, 22px)", fontWeight: 800, color: TEXT, marginBottom: 10, letterSpacing: "-0.02em" }}>
                   Spel verlaten?
                 </div>
-                <div style={{ fontSize: 16, color: MUTED, fontWeight: 500, lineHeight: 1.55, marginBottom: 28 }}>
+                <div style={{ fontSize: "clamp(14px, 4.3vw, 16px)", color: MUTED, fontWeight: 500, lineHeight: 1.55, marginBottom: 28 }}>
                   De huidige ronde gaat verloren en de scores worden gereset.
                 </div>
                 <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
